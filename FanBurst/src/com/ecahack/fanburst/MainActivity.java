@@ -12,10 +12,10 @@ import android.provider.Settings;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import android.view.Menu;
-import android.view.WindowManager;
+import android.view.*;
+import android.view.View.OnClickListener;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnClickListener {
 
 	private ShakeDetector mShakeDetector;
 	private SensorManager mSensorManager;
@@ -41,6 +41,8 @@ public class MainActivity extends Activity {
 				}
 			}
 		});
+		
+		this.findViewById(android.R.id.content).setOnClickListener(this);
 		
 		startConnection();
 	}
@@ -79,6 +81,13 @@ public class MainActivity extends Activity {
 		getWindow().setAttributes(lp);
 	} 
 	
+	private void resetBrightness() {
+		WindowManager.LayoutParams lp = getWindow().getAttributes();
+		lp.screenBrightness = 1;
+		this.findViewById(android.R.id.content).setBackgroundColor(Color.argb(255, 255, 255, 255));
+		getWindow().setAttributes(lp);
+	}
+	
 	
 	private final WebSocketConnection mConnection = new WebSocketConnection();
 
@@ -112,5 +121,10 @@ public class MainActivity extends Activity {
 	}
 	
 	private static final String TAG = "FanBurst";
+
+	@Override
+	public void onClick(View v) {
+		resetBrightness();
+	}
 
 }
