@@ -1,0 +1,45 @@
+<html>
+    <head>
+        <script src="http://yandex.st/jquery/1.7.1/jquery.min.js"></script>
+        <script type="text/javascript">
+          $(document).ready(function() {
+              api.start();
+          });
+
+          api = {
+              socket: null,
+
+              start: function() {
+                  if ("WebSocket" in window) {
+                      api.socket = new WebSocket("ws://localhost:9000/api");
+                  } else {
+                      api.socket = new MozWebSocket("ws://localhost:9000/api");
+                  }
+
+                  api.socket.onmessage = function(event) {
+                      data = JSON.parse(event.data);
+                      console.log(event.data);
+                  }
+              }
+          }
+
+          function send_register() {
+              window.console.log('aaa');
+              window.console.log(api);
+              message = {
+                  'command': 'register',
+                  'data': {
+                      'phone_id': '1',
+                      'sector': '12',
+                      'row': '9',
+                      'place': '20'
+                  }
+              };
+              api.socket.send(JSON.stringify(message));
+          }
+        </script>
+    </head>
+    <body>
+        <a href="#" onclick="javascript:send_register()">Send register</a><br/>
+    </body>
+</html>
