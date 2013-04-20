@@ -7,6 +7,9 @@
               api.start();
           });
 
+          current_pattern = null;
+          current_id = null;
+
           api = {
               socket: null,
 
@@ -17,6 +20,10 @@
                       api.socket = new MozWebSocket("ws://178.79.139.131:9000/api");
                   }
 
+                  api.socket.onerror = function (error) {
+                      console.log('WebSocket Error ' + error);
+                  };
+
                   api.socket.onmessage = function(event) {
                       data = JSON.parse(event.data);
                       if(data['type']=='stats') {
@@ -26,9 +33,29 @@
                           $('#id_sent_time').text(data['data']['sent_time']);
                           $('#id_server_time').text(data['data']['server_time']);
                           $('#id_current_time').text(Math.floor((new Date()).getTime() / 1000));
+                      } else if(data['type']=='pattern') {
+                          window.console.log('start');
+                          current_pattern = data['data'];
+                          current_id = setInterval(function() { play_pattern() }, current_pattern['interval']);
                       }
                       console.log(event.data);
                   }
+              }
+          }
+
+          function play_pattern() {
+              window.console.log('play'+current_pattern)
+              if(!current_pattern || current_pattern['pattern'].length==0) {
+                  $('#id_color').css('background-color', 'black');
+                  clearInterval(current_id);
+                  return;
+              }
+
+              var color = current_pattern['pattern'].shift();
+              if(color) {
+                  $('#id_color').css('background-color', 'white');
+              } else {
+                  $('#id_color').css('background-color', 'black');
               }
           }
 
@@ -85,6 +112,7 @@
                 <h4>Sent Time: <span id="id_sent_time">#</span></h4>
                 <h4>Server Time: <span id="id_server_time">#</span></h4>
                 <h4>Current Time: <span id="id_current_time">#</span></h4>
+                <div id="id_color" style="height:200px;width;200px;background-color:black">&nbsp;</div>
             </div>
     </body>
 </html>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@android:color/white"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <ToggleButton
+        android:id="@+id/togglebutton"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="116dp"
+        android:textOff="Не участвовать"
+        android:textOn="Участвовать"
+        android:onClick="onToggleClicked" />
+    
+    <Button
+        android:id="@+id/flashOnShakeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Махай и моргай :)" 
+        android:layout_below="@+id/togglebutton"
+        android:layout_marginTop="120dp"
+        android:layout_centerInParent="true">
+    </Button>
+
+</RelativeLayout>
