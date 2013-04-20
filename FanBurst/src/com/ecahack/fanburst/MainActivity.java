@@ -23,6 +23,7 @@ import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ToggleButton;
 import android.widget.ViewFlipper;
 
 public class MainActivity extends Activity implements OnClickListener {
@@ -228,6 +229,26 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 	
+	private void sendDeactivateRequest() {
+		JSONObject request = new JSONObject();
+		try {		
+			request.put("command", "'deactivate'");
+			client.send(request.toString());
+		} catch (JSONException e) {
+			Log.e(TAG, "Error, when creating deactivate request", e);
+		}
+	}
+	
+	private void sendActivateRequest() {
+		JSONObject request = new JSONObject();
+		try {		
+			request.put("command", "'activate'");
+			client.send(request.toString());
+		} catch (JSONException e) {
+			Log.e(TAG, "Error, when creating deactivate request", e);
+		}
+	}
+	
 	private boolean validateUserRegisterData(String sector, String row, String place) {
 		return (Integer.parseInt(sector) > 0 && Integer.parseInt(row) > 0 && Integer.parseInt(place) > 0);
 	}
@@ -253,4 +274,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		return editText.getText().toString();
 	}
 
+	
+	public void onToggleClicked(View view) {
+	    boolean on = ((ToggleButton) view).isChecked();
+	    if (on) {
+	        sendActivateRequest();
+	    } else {
+	    	sendDeactivateRequest();
+	    }
+	}
 }
