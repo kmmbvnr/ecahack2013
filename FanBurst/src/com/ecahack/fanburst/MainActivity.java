@@ -26,6 +26,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private ShakeDetector mShakeDetector;
 	private SensorManager mSensorManager;
 	private Sensor mAccelerometer;
+	private TimeSyncService mTimeSync = new TimeSyncService();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +94,16 @@ public class MainActivity extends Activity implements OnClickListener {
 		this.findViewById(android.R.id.content).setBackgroundColor(Color.argb(255, 255, 255, 255));
 		getWindow().setAttributes(lp);
 	}
+
+    private void updateTimeSync(JSONObject data_content) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void updateStats(JSONObject data_content) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	WebSocketClient client = new WebSocketClient(URI.create("ws://178.79.139.131:9000/api"), new Listener() {
 	    @Override
@@ -117,9 +128,23 @@ public class MainActivity extends Activity implements OnClickListener {
 	    @Override
 	    public void onMessage(String message) {
 	        Log.d(TAG, String.format("Got string message! %s", message));
+	        try {
+				JSONObject data = new JSONObject(message);
+				String data_type = data.getString("type");
+				JSONObject data_content = data.getJSONObject("data");
+				if(data_type == "stats") {
+					updateStats(data_content);
+				} else if (data_type == "timesync") {
+					updateTimeSync(data_content);
+				} else {
+					Log.d(TAG, String.format("Unknown data type %s", message));
+				}
+			} catch (JSONException e) {
+				Log.d(TAG, String.format("Can't decode json %s %s", message, e.getMessage()));
+			}
 	    }
 
-	    @Override
+		@Override
 	    public void onMessage(byte[] data) {
 	        //Log.d(TAG, String.format("Got binary message! %s", toHexString(data)));
 	    }
