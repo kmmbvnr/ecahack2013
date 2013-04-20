@@ -1,15 +1,9 @@
 package com.ecahack.fanburst;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.ecahack.fanburst.socket.*;
-import com.ecahack.fanburst.socket.WebSocketClient.Listener;
+import com.ecahack.fanburst.WSClient.WSClientListener;
 
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
@@ -30,19 +24,21 @@ import android.widget.EditText;
 import android.widget.ToggleButton;
 import android.widget.ViewFlipper;
 
-public class MainActivity extends Activity implements OnClickListener, Callback, OnTouchListener {
+public class MainActivity extends Activity implements OnClickListener, Callback, OnTouchListener, WSClientListener {
 
 	private TimeSyncService mTimeSync = new TimeSyncService();
 	private Button mRegisterButton;
-	private Button mFlashOnShakeButton;
+	private Button mFlashButton;
 	private ViewFlipper flipper;
-	private View mRegistrationView;
-	private View mActivationView;
 	private boolean mPatternRunning;
 	private boolean isFlashOn;
 
-	Camera mCamera;
+	private WSClient mWSClient;
 
+	Camera mCamera;
+	private SurfaceHolder mHolder;
+
+	private static final String TAG = "FanBurst";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +46,10 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		setContentView(R.layout.activity_main);
 
 		flipper = (ViewFlipper) findViewById(R.id.flipper);
-
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		mRegistrationView = inflater.inflate(R.layout.registation, null);
-		mActivationView = inflater.inflate(R.layout.activation, null);
 
-		flipper.addView(mRegistrationView);
-		flipper.addView(mActivationView);
+		flipper.addView(inflater.inflate(R.layout.registation, null));
+		flipper.addView(inflater.inflate(R.layout.activation, null));
 
 		flipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in_right));
 		flipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_out_left));
@@ -64,36 +57,19 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		mRegisterButton = (Button)this.findViewById(R.id.registerButton);
 		mRegisterButton.setOnClickListener(this);
 
-		mFlashOnShakeButton = (Button)this.findViewById(R.id.flashOnShakeButton);
-		mFlashOnShakeButton.setOnTouchListener(this);
+		mFlashButton = (Button)this.findViewById(R.id.flashOnShakeButton);
+		mFlashButton.setOnTouchListener(this);
 
-		client.connect();
-		
+		mWSClient = new WSClient(this);
+		mWSClient.connect();
+
 		boolean hasCamera = checkCameraHardware(getApplicationContext());
-		if (hasCamera) {
-			SurfaceView preview = (SurfaceView) findViewById(R.id.surface);
-			mHolder = preview.getHolder();
-			mHolder.addCallback(this);
-			mCamera = Camera.open();
-			try {
-				mCamera.setPreviewDisplay(mHolder);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		else {
+		if (hasCamera) 
+			initCamera();
+		else 
 			showNoCameraDialog();
-		}
 	}
-
-	private void showNoCameraDialog() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("No camera");
-		builder.setMessage("Camera is necessary for application.");
-		builder.setPositiveButton("OK", null);
-		builder.show();
-	}
-
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -111,20 +87,13 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		return false;
 	}
 
-	private boolean checkCameraHardware(Context context) {
-		if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
-			return true;
-		} else {
-			return false;
-		}
+	@Override
+	public void updateStats(long active, long users) {	
 	}
 
-	private void updateTimeSync(JSONObject data_content) {
-		try {
-			mTimeSync.collectResponse(data_content.getLong("sent_time"), data_content.getLong("server_time"));
-		} catch (JSONException e) {
-			Log.e(TAG, "Error when reading timesync response", e);
-		}
+	@Override
+	public void updateTimeSync(long sentTime, long serverTime) {
+		mTimeSync.collectResponse(sentTime, serverTime);
 
 		if(mTimeSync.getSamplesLength() < 5) {
 			sentTimesyncRequest();
@@ -134,38 +103,46 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		}
 	}
 
-	private void updateStats(JSONObject data_content) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void showPattern(JSONObject data_content) {
-		if (mPatternRunning)
-			return;
-		try {
-			JSONArray array = data_content.getJSONArray("pattern");
-			final long interval = data_content.getLong("interval");
-			Log.d(TAG, array.toString());
-			final ArrayList<Integer> list = new ArrayList<Integer>();     
-			int len = array.length();
-			for (int i=0;i<len;i++){ 
-				list.add(Integer.parseInt(array.get(i).toString()));
-			} 
-			MainActivity.this.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					mPatternRunning = true;
-					runPattern(list, interval, 0);
-				}
-			});	
-
-		} catch (JSONException e) {
-
+	@Override
+	public void showPattern(String name, long startAt, long interval, ArrayList<Integer> pattern) {
+		if (!mPatternRunning) {
+			mPatternRunning = true;
+			runPattern(pattern, interval, 0);
 		}
-
 	}
 
+	@Override
+	public void onClick(View v) {
+		if (v == mRegisterButton) {
+			sendRegisterInfo();
+			sentTimesyncRequest();
+		}
+	}
 
+	@Override
+	public boolean onTouch( View button , MotionEvent theMotion ) {
+		if (mPatternRunning)
+			return true;
+		switch ( theMotion.getAction() ) {
+		case MotionEvent.ACTION_DOWN: 
+			turnOn();
+			break;
+		case MotionEvent.ACTION_UP: 
+			turnOff();
+			break;
+		}
+		return true;
+	}
+	
+	public void onToggleClicked(View view) {
+		boolean on = ((ToggleButton) view).isChecked();
+		if (on) {
+			sendActivateRequest();
+		} else {
+			sendDeactivateRequest();
+		}
+	}
+	
 	private void runPattern(final ArrayList<Integer> list, final long interval, final int i) {
 		Integer brightness = list.get(i);
 		if (brightness == 1)
@@ -193,138 +170,21 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 
 	}
 
-
-	WebSocketClient client = new WebSocketClient(URI.create("ws://178.79.139.131:9000/api"), new Listener() {
-		@Override
-		public void onConnect() {
-			Log.d(TAG, "Connected!");
-		}
-
-		@Override
-		public void onMessage(String message) {
-			Log.d(TAG, String.format("Got string message! %s", message));
-			try {
-				JSONObject data = new JSONObject(message);
-				String data_type = data.getString("type");
-				JSONObject data_content = data.getJSONObject("data");
-				if(data_type.equals("stats")) {
-					updateStats(data_content);
-				} else if (data_type.equals("timesync")) {
-					updateTimeSync(data_content);
-				} else if (data_type.equals("pattern")){
-					showPattern(data_content);
-				} 
-				else {
-					Log.d(TAG, String.format("Unknown data type %s", message));
-				} 
-			} catch (JSONException e) {
-				Log.d(TAG, String.format("Can't decode json %s %s", message, e.getMessage()));
-			}
-		}
-
-		@Override
-		public void onMessage(byte[] data) {
-			//Log.d(TAG, String.format("Got binary message! %s", toHexString(data)));
-		}
-
-		@Override
-		public void onDisconnect(int code, String reason) {
-			Log.d(TAG, String.format("Disconnected! Code: %d Reason: %s", code, reason));
-		}
-
-		@Override
-		public void onError(Exception error) {
-			Log.e(TAG, "Error!", error);
-		}
-	}, null);
-
-	private SurfaceHolder mHolder;
-
-
-	private static final String TAG = "FanBurst";
-
-	@Override
-	public void onClick(View v) {
-		if (v == mRegisterButton) {
-			sendRegisterInfo();
-			sentTimesyncRequest();
-		}
-	}
-	
-	@Override
-	public boolean onTouch( View button , MotionEvent theMotion ) {
-		switch ( theMotion.getAction() ) {
-		case MotionEvent.ACTION_DOWN: 
-			turnOn();
-			break;
-		case MotionEvent.ACTION_UP: 
-			turnOff();
-			break;
-		}
-		return true;
-	}
-	
 	private void sendRegisterInfo() {
-		String deviceId = getDeviceId();
-		String sector = getUserSector();
-		String row = getUserRow();
-		String place = getUserPlace();
-		if (validateUserRegisterData(sector, row, place)) {
-			JSONObject object = new JSONObject();
-			JSONObject info = new JSONObject();
-			try {
-				info.put("mobile_id", deviceId);
-				info.put("sector",sector);
-				info.put("row", row);
-				info.put("place", place);
-				object.put("command", "register");
-				object.put("data", info );
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			System.out.println(object);
-			client.send(object.toString());
-
-			flipper.showNext();
-		}
+		mWSClient.sendRegisterInfo(getDeviceId(), getUserSector(), getUserRow(), getUserPlace());
+		flipper.showNext();	
 	}
 
 	private void sentTimesyncRequest() {
-		JSONObject request = new JSONObject();
-		try {		
-			JSONObject data = new JSONObject();
-			data.put("sent_time", mTimeSync.getCurrentTimestamp());	
-
-			request.put("command", "timesync");
-			request.put("data", data);
-			client.send(request.toString());
-		} catch (JSONException e) {
-			Log.e(TAG, "Error, when creating timesync request", e);
-		}
+		mWSClient.sentTimesyncRequest(mTimeSync.getCurrentTimestamp());
 	}
 
 	private void sendDeactivateRequest() {
-		JSONObject request = new JSONObject();
-		try {		
-			request.put("command", "deactivate");
-			client.send(request.toString());
-		} catch (JSONException e) {
-			Log.e(TAG, "Error, when creating deactivate request", e);
-		}
+		mWSClient.sendDeactivateRequest();
 	}
 
 	private void sendActivateRequest() {
-		JSONObject request = new JSONObject();
-		try {		
-			request.put("command", "activate");
-			client.send(request.toString());
-		} catch (JSONException e) {
-			Log.e(TAG, "Error, when creating deactivate request", e);
-		}
-	}
-
-	private boolean validateUserRegisterData(String sector, String row, String place) {
-		return (Integer.parseInt(sector) > 0 && Integer.parseInt(row) > 0 && Integer.parseInt(place) > 0);
+		mWSClient.sendActivateRequest();
 	}
 
 	private String getDeviceId() {
@@ -348,21 +208,21 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		return editText.getText().toString();
 	}
 
-
-	public void onToggleClicked(View view) {
-		boolean on = ((ToggleButton) view).isChecked();
-		if (on) {
-			sendActivateRequest();
-		} else {
-			sendDeactivateRequest();
+	private void initCamera() {
+		SurfaceView preview = (SurfaceView) findViewById(R.id.surface);
+		mHolder = preview.getHolder();
+		mHolder.addCallback(this);
+		mCamera = Camera.open();
+		try {
+			mCamera.setPreviewDisplay(mHolder);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
-
 
 	private void turnOn() {
 		if (!isFlashOn) {
 			isFlashOn = true;
-
 			Parameters params = mCamera.getParameters();
 			params.setFlashMode(Parameters.FLASH_MODE_TORCH);
 			mCamera.setParameters(params);      
@@ -378,6 +238,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			mCamera.setParameters(params);
 		}
 	}
+
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {}
@@ -395,4 +256,21 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		mCamera.stopPreview();
 		mHolder = null;
 	}
+
+	private boolean checkCameraHardware(Context context) {
+		if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private void showNoCameraDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("No camera");
+		builder.setMessage("Camera is necessary for application.");
+		builder.setPositiveButton("OK", null);
+		builder.show();
+	}
+
 }
