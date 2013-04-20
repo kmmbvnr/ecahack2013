@@ -53,8 +53,9 @@ class Application(cyclone.web.Application):
 
 
 class MainHandler(cyclone.web.RequestHandler):
-    def initialize(self, fans):
+    def initialize(self, fans, active_fans):
         self.fans = fans
+        self.active_fans = active_fans
 
     def get(self):
         return self.render("index.html")
