@@ -15,7 +15,8 @@
         android:layout_alignLeft="@+id/sectorTextView"
         android:layout_below="@+id/sectorTextView"
         android:layout_marginTop="57dp"
-        android:ems="10" />
+        android:ems="10"
+        android:inputType="number" />
 
     <EditText
         android:id="@+id/placeTextView"
@@ -24,7 +25,8 @@
         android:layout_alignLeft="@+id/rowTextView"
         android:layout_below="@+id/rowTextView"
         android:layout_marginTop="50dp"
-        android:ems="10" />
+        android:ems="10"
+        android:inputType="number" />
 
     <TextView
         android:id="@+id/textView1"
@@ -42,7 +44,8 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/textView1"
         android:layout_marginLeft="38dp"
-        android:ems="10" />
+        android:ems="10"
+        android:inputType="number" />
 
     <TextView
         android:id="@+id/textView2"

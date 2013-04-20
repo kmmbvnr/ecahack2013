@@ -14,6 +14,7 @@ import android.content.Context;
 import android.util.Log;
 import android.view.*;
 import android.view.View.OnClickListener;
+import android.widget.EditText;
 
 public class MainActivity extends Activity implements OnClickListener {
 
@@ -125,6 +126,27 @@ public class MainActivity extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		resetBrightness();
+	}
+	
+	private String getDeviceId() {
+		return  UniqueIdentifier.id(getApplicationContext());
+	}
+	
+	private String getUserSector() {
+		return getEditTextValue(R.id.sectorTextView);
+	}
+	
+	private String getUserPlace() {
+		return getEditTextValue(R.id.placeTextView);
+	}
+	
+	private String getUserRow() {
+		return getEditTextValue(R.id.rowTextView);
+	}
+	
+	private String getEditTextValue(int id) {
+		EditText editText = (EditText) this.findViewById(id);
+		return editText.getText().toString();
 	}
 
 }
