@@ -33,7 +33,11 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Sensor mAccelerometer;
 	private TimeSyncService mTimeSync = new TimeSyncService();
 	private Button mRegisterButton;
+	private Button mFlashOnShakeButton;
 	private ViewFlipper flipper;
+	private View mRegistrationView;
+	private View mActivationView;
+	private View mFlashView;
 
 
 	@Override
@@ -44,9 +48,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		flipper = (ViewFlipper) findViewById(R.id.flipper);
 
 	    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	    int layouts[] = new int[]{ R.layout.registation, R.layout.flash };
-	    for (int layout : layouts)
-	        flipper.addView(inflater.inflate(layout, null));
+	    mRegistrationView = inflater.inflate(R.layout.registation, null);
+	    mActivationView = inflater.inflate(R.layout.activation, null);
+	    mFlashView = inflater.inflate(R.layout.flash, null);
+	   
+	    flipper.addView(mRegistrationView);
+	    flipper.addView(mActivationView);
+	    flipper.addView(mFlashView);
 	    
 	    flipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in_right));
         flipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_out_left));
@@ -62,15 +70,18 @@ public class MainActivity extends Activity implements OnClickListener {
 			@Override
 			public void onShake() {
 				synchronized (this) {
-					//runBrightnessFlash();
+					runBrightnessFlash();
 				}
 			}
 		});
 		
-		this.findViewById(android.R.id.content).setOnClickListener(this);
+		mFlashView.setOnClickListener(this);
 		
 		mRegisterButton = (Button)this.findViewById(R.id.registerButton);
 		mRegisterButton.setOnClickListener(this);
+		
+		mFlashOnShakeButton = (Button)this.findViewById(R.id.flashOnShakeButton);
+		mFlashOnShakeButton.setOnClickListener(this);
 		
 		client.connect();
 	}
@@ -96,15 +107,18 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	public void runBrightnessFlash() {
+		if (flipper.getCurrentView() != mFlashView)
+			return;
+		
 		WindowManager.LayoutParams lp = getWindow().getAttributes();
 
 		if (lp.screenBrightness == 0) {
 			lp.screenBrightness = 1;
-			this.findViewById(android.R.id.content).setBackgroundColor(Color.argb(255, 255, 255, 255));
+			mFlashView.setBackgroundColor(Color.argb(255, 255, 255, 255));
 		}
 		else {
 			lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_OFF;
-			this.findViewById(android.R.id.content).setBackgroundColor(Color.argb(255, 0, 0, 0));
+			mFlashView.setBackgroundColor(Color.argb(255, 0, 0, 0));
 		}
 		getWindow().setAttributes(lp);
 	} 
@@ -186,8 +200,13 @@ public class MainActivity extends Activity implements OnClickListener {
 			sendRegisterInfo();
 			sentTimesyncRequest();
 		}
-		
-		resetBrightness();
+		else if (v == mFlashOnShakeButton) {
+			flipper.showNext();
+		} 
+		else if (v == mFlashView ) {
+			resetBrightness();
+			flipper.showPrevious();
+		}
 	}
 	
 	private void sendRegisterInfo() {
@@ -232,7 +251,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private void sendDeactivateRequest() {
 		JSONObject request = new JSONObject();
 		try {		
-			request.put("command", "'deactivate'");
+			request.put("command", "deactivate");
 			client.send(request.toString());
 		} catch (JSONException e) {
 			Log.e(TAG, "Error, when creating deactivate request", e);
@@ -242,7 +261,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private void sendActivateRequest() {
 		JSONObject request = new JSONObject();
 		try {		
-			request.put("command", "'activate'");
+			request.put("command", "activate");
 			client.send(request.toString());
 		} catch (JSONException e) {
 			Log.e(TAG, "Error, when creating deactivate request", e);
