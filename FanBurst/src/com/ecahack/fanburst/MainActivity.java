@@ -15,12 +15,15 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.util.Log;
 import android.view.*;
 import android.view.View.OnClickListener;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ViewFlipper;
 
 public class MainActivity extends Activity implements OnClickListener {
 
@@ -29,12 +32,23 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Sensor mAccelerometer;
 	private TimeSyncService mTimeSync = new TimeSyncService();
 	private Button mRegisterButton;
+	private ViewFlipper flipper;
 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		flipper = (ViewFlipper) findViewById(R.id.flipper);
+
+	    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	    int layouts[] = new int[]{ R.layout.registation, R.layout.flash };
+	    for (int layout : layouts)
+	        flipper.addView(inflater.inflate(layout, null));
+	    
+	    flipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in_right));
+        flipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_out_left));
 		
 		Settings.System.putInt(getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
@@ -182,6 +196,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	        }
 	        System.out.println(object);
 	        client.send(object.toString());
+	        
+	        flipper.showNext();
 		}
 	}
 	
