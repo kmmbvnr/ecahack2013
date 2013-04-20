@@ -16,6 +16,7 @@ import android.hardware.Camera.Parameters;
 import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -67,18 +68,31 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		mFlashOnShakeButton.setOnTouchListener(this);
 
 		client.connect();
-
-		SurfaceView preview = (SurfaceView) findViewById(R.id.surface);
-		mHolder = preview.getHolder();
-		mHolder.addCallback(this);
-		mCamera = Camera.open();
-		try {
-			mCamera.setPreviewDisplay(mHolder);
-		} catch (IOException e) {
-			e.printStackTrace();
+		
+		boolean hasCamera = checkCameraHardware(getApplicationContext());
+		if (hasCamera) {
+			SurfaceView preview = (SurfaceView) findViewById(R.id.surface);
+			mHolder = preview.getHolder();
+			mHolder.addCallback(this);
+			mCamera = Camera.open();
+			try {
+				mCamera.setPreviewDisplay(mHolder);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else {
+			showNoCameraDialog();
 		}
 	}
 
+	private void showNoCameraDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("No camera");
+		builder.setMessage("Camera is necessary for application.");
+		builder.setPositiveButton("OK", null);
+		builder.show();
+	}
 
 	@Override
 	protected void onResume() {
@@ -99,10 +113,8 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 
 	private boolean checkCameraHardware(Context context) {
 		if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
-			// this device has a camera
 			return true;
 		} else {
-			// no camera on this device
 			return false;
 		}
 	}
