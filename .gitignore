@@ -22,3 +22,6 @@ local.properties
 # Python
 *.pyc
 server/env
+
+# Mac
+.DS_Store
