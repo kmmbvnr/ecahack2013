@@ -53,6 +53,10 @@ public class TimeSyncService {
 	public long getCurrentTimestamp() {
 		return System.currentTimeMillis()/1000L + mTimeshift;
 	}	
+	
+	public int getSamplesLength() {
+		return mRoundTrips.size();
+	}
 
 	public void collectResponse(long sent_timestamp, long server_timestamp) {
 		Roundtrip roundtrip = new Roundtrip(sent_timestamp, server_timestamp, this.getCurrentTimestamp());
@@ -84,12 +88,16 @@ public class TimeSyncService {
 		int count = 0;
 		long meanTimeshift = 0;
 		for(Roundtrip roundTrip : mRoundTrips) {
-			if(latencyMedian - std_dev < roundTrip.latency() && roundTrip.latency() < latencyMedian + std_dev) {
+			if(latencyMedian - std_dev <= roundTrip.latency() && roundTrip.latency() <= latencyMedian + std_dev) {
 				meanTimeshift += roundTrip.timeshift();
 				count += 1;
 			}
 		}
 
-		mTimeshift = meanTimeshift/count;
+		mTimeshift += (meanTimeshift/count);
+	}
+
+	public long getTimeshift() {
+		return mTimeshift;
 	}	
 }
