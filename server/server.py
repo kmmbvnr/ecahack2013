@@ -60,7 +60,7 @@ class PatternBuilder(object):
         self.start()
 
     def create_pattern(self):
-        pattern_num = random.randint(1,1)
+        pattern_num = random.randint(2,2)
         if pattern_num == 1: 
             """
             Мигаем
@@ -72,7 +72,24 @@ class PatternBuilder(object):
                     'interval': 100,
                     'pattern':  [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]
                 }
+        elif pattern_num == 2:
+            """
+            Вперед, омичка, мы с тобой
+            """
+            for n, fun in enumerate(self.active_fans.keys()):
+                if (n+1)%3 == 0:
+                    template = [1, 1, 0, 0, 0, 0, 0, 0 ]
+                elif (n+1)%3 == 1:
+                    template = [0, 0, 0, 1, 1, 0, 0, 0 ]
+                else:
+                    template = [0, 0, 0, 0, 0, 0, 1, 1 ]
 
+                yield fun, {
+                    'pattern_name': u'Вперед, омичка, Мы с тобой',
+                    'start_at': calendar.timegm(datetime.utcnow().utctimetuple()) + 10,
+                    'interval': 200,
+                    'pattern':  [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0] + template
+                }
 
 
 class MainHandler(cyclone.web.RequestHandler):
@@ -147,7 +164,7 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
             del self.fans[self]
 
         if self in self.active_fans:
-            del self.active_fans
+            del self.active_fans[self]
 
         if self._stats_updater:
              self._stats_updater.stop()
