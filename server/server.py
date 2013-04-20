@@ -1,9 +1,12 @@
 #!/usr/bin/env python2.7
+import calendar
 import os
 import sys
+import time
 import cyclone.web
 import cyclone.websocket
 import cyclone.escape
+from datetime import datetime
 from twisted.python import log
 from twisted.internet import reactor, task
 
@@ -11,13 +14,33 @@ from twisted.internet import reactor, task
 BASE_PATH = os.path.dirname(__file__)
 
 
+# http://stackoverflow.com/questions/5067218/get-utc-timestamp-in-python-with-datetime
+def utc_mktime(utc_tuple):
+    """Returns number of seconds elapsed since epoch
+
+    Note that no timezone are taken into consideration.
+
+    utc tuple must be: (year, month, day, hour, minute, second)
+
+    """
+    if len(utc_tuple) == 6:
+        utc_tuple += (0, 0, 0)
+    return time.mktime(utc_tuple) - time.mktime((1970, 1, 1, 0, 0, 0, 0, 0, 0))
+
+
+def datetime_to_timestamp(dt):
+    """Converts a datetime object to UTC timestamp"""
+    return int(utc_mktime(dt.timetuple()))
+
+
 class Application(cyclone.web.Application):
     def __init__(self):
         fans = {}
+        active_fans = {}
         
         handlers = [
-             (r"/", MainHandler, dict(fans=fans)),
-             (r"/api", APIHandler, dict(fans=fans)),
+             (r"/", MainHandler, dict(fans=fans, active_fans=active_fans)),
+             (r"/api", APIHandler, dict(fans=fans, active_fans=active_fans)),
              (r"/test", TestHandler, dict(fans=fans)),
         ]
 
@@ -49,8 +72,9 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
     """
     Mobile phone API
     """
-    def initialize(self, fans):
+    def initialize(self, fans, active_fans):
         self.fans = fans
+        self.active_fans = active_fans
         self._stats_updater = None
 
     def command_register(self, message):
@@ -66,6 +90,24 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
         # send stats back
         self._stats_updater = task.LoopingCall(self._sendStats)
         self._stats_updater.start(2)
+
+    def command_activate(self, message):
+        self.fans[self].active = True
+        self.active_fans[self] = self.fans[self]
+
+    def command_deactivate(self, message):
+        self.fans[self].active = False
+        del self.active_fans[self]
+
+    def command_timesync(self, message):
+        data = {
+            'type': 'timesync',
+            'data': {
+                'sent_time' : message['data']['sent_time'],
+                'server_time' : calendar.timegm(datetime.utcnow().utctimetuple())
+            }
+        }
+        self.sendMessage(cyclone.escape.json_encode(data))
 
     def connectionMade(self):
         self.fans[self] = FunMobile()
@@ -91,7 +133,7 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
             'type': 'stats',
             'data': {
                 'users': len(self.fans),
-                # 'active': self.stats.active
+                'active': len(self.active_fans)
             }
         }
         self.sendMessage(cyclone.escape.json_encode(data))
