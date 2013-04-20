@@ -17,6 +17,10 @@
                       api.socket = new MozWebSocket("ws://localhost:9000/api");
                   }
 
+                  api.socket.onerror = function (error) {
+                      console.log('WebSocket Error ' + error);
+                  };
+
                   api.socket.onmessage = function(event) {
                       data = JSON.parse(event.data);
                       if(data['type']=='stats') {
