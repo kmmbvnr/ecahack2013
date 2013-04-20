@@ -1,7 +1,9 @@
 package com.ecahack.fanburst;
 
 import java.net.URI;
+import java.util.ArrayList;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,6 +15,7 @@ import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -38,6 +41,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	private View mRegistrationView;
 	private View mActivationView;
 	private View mFlashView;
+	private boolean mFlashOnShakeMode;
+	private boolean mPatternRunning;
 
 
 	@Override
@@ -111,8 +116,13 @@ public class MainActivity extends Activity implements OnClickListener {
 			return;
 		
 		WindowManager.LayoutParams lp = getWindow().getAttributes();
-
-		if (lp.screenBrightness == 0) {
+		setBrightness((lp.screenBrightness==1)?0:1);
+	}
+	
+	private void setBrightness(int brightness) {
+		
+		WindowManager.LayoutParams lp = getWindow().getAttributes();
+		if (brightness == 1) {
 			lp.screenBrightness = 1;
 			mFlashView.setBackgroundColor(Color.argb(255, 255, 255, 255));
 		}
@@ -121,12 +131,12 @@ public class MainActivity extends Activity implements OnClickListener {
 			mFlashView.setBackgroundColor(Color.argb(255, 0, 0, 0));
 		}
 		getWindow().setAttributes(lp);
-	} 
+	}
 	
 	private void resetBrightness() {
 		WindowManager.LayoutParams lp = getWindow().getAttributes();
 		lp.screenBrightness = 1;
-		this.findViewById(android.R.id.content).setBackgroundColor(Color.argb(255, 255, 255, 255));
+		mFlashView.setBackgroundColor(Color.argb(255, 255, 255, 255));
 		getWindow().setAttributes(lp);
 	}
 
@@ -150,6 +160,60 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 	}
 	
+	private void showPattern(JSONObject data_content) {
+		if (mPatternRunning)
+			return;
+		try {
+			JSONArray array = data_content.getJSONArray("pattern");
+			final long interval = data_content.getLong("interval");
+			Log.d(TAG, array.toString());
+			final ArrayList<Integer> list = new ArrayList<Integer>();     
+			int len = array.length();
+			for (int i=0;i<len;i++){ 
+			   list.add(Integer.parseInt(array.get(i).toString()));
+			} 
+			MainActivity.this.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					flipper.showNext();
+					mPatternRunning = true;
+					runPattern(list, interval, 0);
+					Log.d(TAG, list.toString());
+				}
+			});	
+			
+		} catch (JSONException e) {
+			
+		}
+		
+	}
+
+	
+	private void runPattern(final ArrayList<Integer> list, final long interval, final int i) {
+		Integer brightness = list.get(i);
+		setBrightness(brightness);
+		if (i + 1 < list.size()) {
+			final Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					MainActivity.this.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							runPattern(list, interval, i+1);
+						}
+					});	
+				}
+			}, interval);
+		}
+		else {
+			mPatternRunning = false;
+			flipper.showPrevious();
+		}
+
+	}
+
+
 	WebSocketClient client = new WebSocketClient(URI.create("ws://178.79.139.131:9000/api"), new Listener() {
 	    @Override
 	    public void onConnect() {
@@ -167,9 +231,12 @@ public class MainActivity extends Activity implements OnClickListener {
 					updateStats(data_content);
 				} else if (data_type.equals("timesync")) {
 					updateTimeSync(data_content);
-				} else {
+				} else if (data_type.equals("pattern")){
+					showPattern(data_content);
+				} 
+				else {
 					Log.d(TAG, String.format("Unknown data type %s", message));
-				}
+				} 
 			} catch (JSONException e) {
 				Log.d(TAG, String.format("Can't decode json %s %s", message, e.getMessage()));
 			}
@@ -202,9 +269,11 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 		else if (v == mFlashOnShakeButton) {
 			flipper.showNext();
+			mFlashOnShakeMode = true;
 		} 
-		else if (v == mFlashView ) {
+		else if (v == mFlashView && mFlashOnShakeMode) {
 			resetBrightness();
+			mFlashOnShakeMode = false;
 			flipper.showPrevious();
 		}
 	}
@@ -233,7 +302,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	        flipper.showNext();
 		}
 	}
-	
+	 
 	private void sentTimesyncRequest() {
 		JSONObject request = new JSONObject();
 		try {		
