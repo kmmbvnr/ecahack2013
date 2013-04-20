@@ -102,8 +102,18 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
     private void updateTimeSync(JSONObject data_content) {
-		// TODO Auto-generated method stub
-		
+    	try {
+			mTimeSync.collectResponse(data_content.getLong("sent_time"), data_content.getLong("server_time"));
+		} catch (JSONException e) {
+			Log.e(TAG, "Error when reading timesync response", e);
+		}
+    	
+		if(mTimeSync.getSamplesLength() < 5) {
+			sentTimesyncRequest();
+		} else {
+			mTimeSync.finish();
+			Log.d(TAG, String.format("Result timeshift %d", mTimeSync.getTimeshift()));
+		}
 	}
 
 	private void updateStats(JSONObject data_content) {
@@ -124,9 +134,9 @@ public class MainActivity extends Activity implements OnClickListener {
 				JSONObject data = new JSONObject(message);
 				String data_type = data.getString("type");
 				JSONObject data_content = data.getJSONObject("data");
-				if(data_type == "stats") {
+				if(data_type.equals("stats")) {
 					updateStats(data_content);
-				} else if (data_type == "timesync") {
+				} else if (data_type.equals("timesync")) {
 					updateTimeSync(data_content);
 				} else {
 					Log.d(TAG, String.format("Unknown data type %s", message));
@@ -157,8 +167,11 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		if (v == mRegisterButton)
+		if (v == mRegisterButton) {
 			sendRegisterInfo();
+			sentTimesyncRequest();
+		}
+		
 		resetBrightness();
 	}
 	
@@ -182,6 +195,20 @@ public class MainActivity extends Activity implements OnClickListener {
 	        }
 	        System.out.println(object);
 	        client.send(object.toString());
+		}
+	}
+	
+	private void sentTimesyncRequest() {
+		JSONObject request = new JSONObject();
+		try {		
+			JSONObject data = new JSONObject();
+			data.put("sent_time", mTimeSync.getCurrentTimestamp());	
+
+			request.put("command", "timesync");
+			request.put("data", data);
+			client.send(request.toString());
+		} catch (JSONException e) {
+			Log.e(TAG, "Error, when creating timesync request", e);
 		}
 	}
 	
