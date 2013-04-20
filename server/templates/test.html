@@ -21,6 +21,11 @@
                       data = JSON.parse(event.data);
                       if(data['type']=='stats') {
                           $('#id_users_cnt').text(data['data']['users']);
+                          $('#id_users_active').text(data['data']['active']);
+                      } else if(data['type']=='timesync') {
+                          $('#id_sent_time').text(data['data']['sent_time']);
+                          $('#id_server_time').text(data['data']['server_time']);
+                          $('#id_current_time').text(Math.floor((new Date()).getTime() / 1000));
                       }
                       console.log(event.data);
                   }
@@ -28,8 +33,6 @@
           }
 
           function send_register() {
-              window.console.log('aaa');
-              window.console.log(api);
               message = {
                   'command': 'register',
                   'data': {
@@ -40,7 +43,31 @@
                   }
               };
               api.socket.send(JSON.stringify(message));
-          }
+          };
+
+          function send_activate() {
+              message = {
+                  'command': 'activate'
+              };
+              api.socket.send(JSON.stringify(message));
+          };
+
+          function send_deactivate() {
+              message = {
+                  'command': 'deactivate'
+              };
+              api.socket.send(JSON.stringify(message));
+          };
+
+          function send_timesync() {
+              message = {
+                  'command': 'timesync',
+                  'data': {
+                      'sent_time': Math.floor((new Date()).getTime() / 1000)
+                  }
+              };
+              api.socket.send(JSON.stringify(message));
+          };
         </script>
     </head>
     <body>
@@ -48,9 +75,16 @@
             <div  class="span8">
                 <h1>Commands</h1>
                 <a href="#" onclick="javascript:send_register()">Send register</a><br/>
+                <a href="#" onclick="javascript:send_activate()">Send activate</a><br/>
+                <a href="#" onclick="javascript:send_deactivate()">Send deactivate</a><br/>
+                <a href="#" onclick="javascript:send_timesync()">Send timesync</a><br/>
             </div>
             <div class="span4">
                 <h4>Users: <span id="id_users_cnt">#</span></h4>
+                <h4>Active: <span id="id_users_active">#</span></h4>
+                <h4>Sent Time: <span id="id_sent_time">#</span></h4>
+                <h4>Server Time: <span id="id_server_time">#</span></h4>
+                <h4>Current Time: <span id="id_current_time">#</span></h4>
             </div>
     </body>
 </html>
