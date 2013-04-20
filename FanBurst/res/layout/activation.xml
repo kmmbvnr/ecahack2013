@@ -19,10 +19,27 @@
         android:id="@+id/flashOnShakeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Махай и моргай :)" 
+        android:text="Включи и свети :)" 
         android:layout_below="@+id/togglebutton"
         android:layout_marginTop="120dp"
         android:layout_centerInParent="true">
     </Button>
+
+    <TextView
+        android:id="@+id/activeUsersTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="47dp"
+        android:text="12" />
+
+    <TextView
+        android:id="@+id/patternTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/togglebutton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp" />
 
 </RelativeLayout>

@@ -21,6 +21,7 @@ import android.view.View.OnTouchListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 import android.widget.ViewFlipper;
 
@@ -29,6 +30,8 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	private TimeSyncService mTimeSync = new TimeSyncService();
 	private Button mRegisterButton;
 	private Button mFlashButton;
+	private TextView mActiveUsersView;
+	private TextView mPatternTextView;
 	private ViewFlipper flipper;
 	private boolean mPatternRunning;
 	private boolean isFlashOn;
@@ -59,6 +62,9 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 
 		mFlashButton = (Button)this.findViewById(R.id.flashOnShakeButton);
 		mFlashButton.setOnTouchListener(this);
+		
+		mActiveUsersView = (TextView)this.findViewById(R.id.activeUsersTextView);
+		mPatternTextView = (TextView)this.findViewById(R.id.patternTextView);
 
 		mWSClient = new WSClient(this);
 		mWSClient.connect();
@@ -88,7 +94,15 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	}
 
 	@Override
-	public void updateStats(long active, long users) {	
+	public void updateStats(final long active, long users) {
+		MainActivity.this.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Log.d(TAG, String.valueOf(active));
+				mActiveUsersView.setText(String.valueOf(active));
+				Log.d(TAG, mActiveUsersView.getText().toString());
+			}
+		});	
 	}
 
 	@Override
@@ -104,10 +118,16 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	}
 
 	@Override
-	public void showPattern(String name, long startAt, long interval, ArrayList<Integer> pattern) {
+	public void showPattern(final String name, long startAt, final long interval, final ArrayList<Integer> pattern) {
 		if (!mPatternRunning) {
-			mPatternRunning = true;
-			runPattern(pattern, interval, 0);
+			MainActivity.this.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					mPatternRunning = true;
+					runPattern(pattern, interval, 0);
+					mPatternTextView.setText(name);
+				}
+			});	
 		}
 	}
 
@@ -272,5 +292,4 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		builder.setPositiveButton("OK", null);
 		builder.show();
 	}
-
 }

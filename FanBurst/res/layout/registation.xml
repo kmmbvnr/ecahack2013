@@ -12,7 +12,7 @@
         android:id="@+id/sectorTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
+        android:layout_below="@+id/activeUsersView"
         android:layout_marginLeft="38dp"
         android:ems="10"
         android:layout_centerInParent="true"
@@ -39,7 +39,7 @@
         android:inputType="number" />
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/activeUsersView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/sectorTextView"
