@@ -35,8 +35,11 @@
                           $('#id_current_time').text(Math.floor((new Date()).getTime() / 1000));
                       } else if(data['type']=='pattern') {
                           window.console.log('start');
-                          current_pattern = data['data'];
-                          current_id = setInterval(function() { play_pattern() }, current_pattern['interval']);
+                          if(!current_pattern || current_pattern['pattern'].length==0) {
+                              current_pattern = data['data'];
+                              $('#id_pattern_name').text(current_pattern['pattern_name'])
+                              current_id = setInterval(function() { play_pattern() }, current_pattern['interval']);
+                          }
                       }
                       console.log(event.data);
                   }
@@ -48,6 +51,7 @@
               if(!current_pattern || current_pattern['pattern'].length==0) {
                   $('#id_color').css('background-color', 'black');
                   clearInterval(current_id);
+                  $('#id_pattern_name').text('#');
                   return;
               }
 
@@ -112,7 +116,8 @@
                 <h4>Sent Time: <span id="id_sent_time">#</span></h4>
                 <h4>Server Time: <span id="id_server_time">#</span></h4>
                 <h4>Current Time: <span id="id_current_time">#</span></h4>
-                <div id="id_color" style="height:200px;width;200px;background-color:black">&nbsp;</div>
+                <h4>Pattern name: <span id="id_pattern_name">#</span></h4>
+                <div id="id_color" style="border:1px solid black;height:200px;width;200px;background-color:black">&nbsp;</div>
             </div>
     </body>
 </html>
