@@ -1,8 +1,9 @@
 #!/usr/bin/env python2.7
+# -*- encoding: utf-8 -*-
 import calendar
 import os
 import sys
-import time
+import random
 import cyclone.web
 import cyclone.websocket
 import cyclone.escape
@@ -14,33 +15,15 @@ from twisted.internet import reactor, task
 BASE_PATH = os.path.dirname(__file__)
 
 
-# http://stackoverflow.com/questions/5067218/get-utc-timestamp-in-python-with-datetime
-def utc_mktime(utc_tuple):
-    """Returns number of seconds elapsed since epoch
-
-    Note that no timezone are taken into consideration.
-
-    utc tuple must be: (year, month, day, hour, minute, second)
-
-    """
-    if len(utc_tuple) == 6:
-        utc_tuple += (0, 0, 0)
-    return time.mktime(utc_tuple) - time.mktime((1970, 1, 1, 0, 0, 0, 0, 0, 0))
-
-
-def datetime_to_timestamp(dt):
-    """Converts a datetime object to UTC timestamp"""
-    return int(utc_mktime(dt.timetuple()))
-
-
 class Application(cyclone.web.Application):
     def __init__(self):
         fans = {}
         active_fans = {}
+        pattern_builder = PatternBuilder(active_fans=active_fans)
         
         handlers = [
              (r"/", MainHandler, dict(fans=fans, active_fans=active_fans)),
-             (r"/api", APIHandler, dict(fans=fans, active_fans=active_fans)),
+             (r"/api", APIHandler, dict(fans=fans, active_fans=active_fans, pattern_builder=pattern_builder)),
              (r"/test", TestHandler, dict(fans=fans)),
         ]
 
@@ -50,6 +33,46 @@ class Application(cyclone.web.Application):
         }
 
         cyclone.web.Application.__init__(self, handlers, **settings)
+
+
+class PatternBuilder(object):
+    def __init__(self, active_fans):
+        self.active_fans = active_fans
+        self.active_timer = None
+
+    def start(self):
+        self.stop()
+        delay = random.randint(5, 10)
+        self.active_timer = reactor.callLater(delay, self.execute)
+
+    def stop(self):
+        if self.active_timer:
+            if not self.active_timer.called:
+                self.active_timer.cancel()
+            self.active_timer = None
+
+    def execute(self):
+        self.stop()
+        pattern_data = self.create_pattern()
+        for fun, pattern in pattern_data:
+            fun.sendMessage(cyclone.escape.json_encode({ 'type' : 'pattern',
+                                                         'data': pattern }))
+        self.start()
+
+    def create_pattern(self):
+        pattern_num = random.randint(1,1)
+        if pattern_num == 1: 
+            """
+            Мигаем
+            """
+            for fun in self.active_fans.keys():
+                yield fun, {
+                    'pattern_name': u'А-а-а-а-а-а!',
+                    'start_at': calendar.timegm(datetime.utcnow().utctimetuple()) + 10,
+                    'interval': 100,
+                    'pattern':  [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]
+                }
+
 
 
 class MainHandler(cyclone.web.RequestHandler):
@@ -73,9 +96,10 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
     """
     Mobile phone API
     """
-    def initialize(self, fans, active_fans):
+    def initialize(self, fans, active_fans, pattern_builder):
         self.fans = fans
         self.active_fans = active_fans
+        self.pattern_builder = pattern_builder
         self._stats_updater = None
 
     def command_register(self, message):
@@ -96,6 +120,11 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
         self.fans[self].active = True
         self.active_fans[self] = self.fans[self]
 
+        if len(self.active_fans) == 1:
+            self.pattern_builder.start()
+        elif len(self.active_fans) > len(self.fans)*0.7:
+            self.pattern_builder.execute()
+
     def command_deactivate(self, message):
         self.fans[self].active = False
         del self.active_fans[self]
@@ -114,7 +143,12 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
         self.fans[self] = FunMobile()
 
     def connectionLost(self, reason):
-        del self.fans[self]
+        if self in self.fans:
+            del self.fans[self]
+
+        if self in self.active_fans:
+            del self.active_fans
+
         if self._stats_updater:
              self._stats_updater.stop()
 
