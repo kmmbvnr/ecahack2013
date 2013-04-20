@@ -19,6 +19,7 @@ import android.content.Context;
 import android.util.Log;
 import android.view.*;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 
 public class MainActivity extends Activity implements OnClickListener {
@@ -26,6 +27,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private ShakeDetector mShakeDetector;
 	private SensorManager mSensorManager;
 	private Sensor mAccelerometer;
+	private Button mRegisterButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,12 +45,15 @@ public class MainActivity extends Activity implements OnClickListener {
 			@Override
 			public void onShake() {
 				synchronized (this) {
-					runBrightnessFlash();
+					//runBrightnessFlash();
 				}
 			}
 		});
 		
 		this.findViewById(android.R.id.content).setOnClickListener(this);
+		
+		mRegisterButton = (Button)this.findViewById(R.id.registerButton);
+		mRegisterButton.setOnClickListener(this);
 		
 		client.connect();
 	}
@@ -98,20 +103,6 @@ public class MainActivity extends Activity implements OnClickListener {
 	    @Override
 	    public void onConnect() {
 	        Log.d(TAG, "Connected!");
-	        JSONObject object = new JSONObject();
-	        JSONObject info = new JSONObject();
-	        try {
-	        	info.put("mobile_id", "1");
-	        	info.put("sector","12");
-	        	info.put("row", "9");
-	        	info.put("place", "20");
-	          object.put("command", "register");
-	          object.put("data", info );
-	        } catch (JSONException e) {
-	          e.printStackTrace();
-	        }
-	        System.out.println(object);
-	        client.send(object.toString());
 	    }
 
 	    @Override
@@ -140,7 +131,36 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
+		if (v == mRegisterButton)
+			sendRegisterInfo();
 		resetBrightness();
+	}
+	
+	private void sendRegisterInfo() {
+		String deviceId = getDeviceId();
+		String sector = getUserSector();
+		String row = getUserRow();
+		String place = getUserPlace();
+		if (validateUserRegisterData(sector, row, place)) {
+			JSONObject object = new JSONObject();
+	        JSONObject info = new JSONObject();
+	        try {
+	        	info.put("mobile_id", deviceId);
+	        	info.put("sector",sector);
+	        	info.put("row", row);
+	        	info.put("place", place);
+	          object.put("command", "register");
+	          object.put("data", info );
+	        } catch (JSONException e) {
+	          e.printStackTrace();
+	        }
+	        System.out.println(object);
+	        client.send(object.toString());
+		}
+	}
+	
+	private boolean validateUserRegisterData(String sector, String row, String place) {
+		return (Integer.parseInt(sector) > 0 && Integer.parseInt(row) > 0 && Integer.parseInt(place) > 0);
 	}
 	
 	private String getDeviceId() {
