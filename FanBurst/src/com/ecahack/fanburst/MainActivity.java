@@ -98,9 +98,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		MainActivity.this.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				Log.d(TAG, String.valueOf(active));
 				mActiveUsersView.setText(String.valueOf(active));
-				Log.d(TAG, mActiveUsersView.getText().toString());
 			}
 		});	
 	}
