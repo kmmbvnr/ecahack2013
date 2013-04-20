@@ -1,8 +1,13 @@
 package com.ecahack.fanburst;
 
-import com.ecahack.fanburst.ShakeDetector.OnShakeListener;
+import java.net.URI;
 
-import de.tavendo.autobahn.*;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.ecahack.fanburst.ShakeDetector.OnShakeListener;
+import com.ecahack.fanburst.socket.*;
+import com.ecahack.fanburst.socket.WebSocketClient.Listener;
 
 import android.graphics.Color;
 import android.hardware.Sensor;
@@ -45,7 +50,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 		this.findViewById(android.R.id.content).setOnClickListener(this);
 		
-		startConnection();
+		client.connect();
 	}
 
 
@@ -89,37 +94,47 @@ public class MainActivity extends Activity implements OnClickListener {
 		getWindow().setAttributes(lp);
 	}
 	
-	
-	private final WebSocketConnection mConnection = new WebSocketConnection();
+	WebSocketClient client = new WebSocketClient(URI.create("ws://178.79.139.131:9000/api"), new Listener() {
+	    @Override
+	    public void onConnect() {
+	        Log.d(TAG, "Connected!");
+	        JSONObject object = new JSONObject();
+	        JSONObject info = new JSONObject();
+	        try {
+	        	info.put("mobile_id", "1");
+	        	info.put("sector","12");
+	        	info.put("row", "9");
+	        	info.put("place", "20");
+	          object.put("command", "register");
+	          object.put("data", info );
+	        } catch (JSONException e) {
+	          e.printStackTrace();
+	        }
+	        System.out.println(object);
+	        client.send(object.toString());
+	    }
 
-	private void startConnection() {
+	    @Override
+	    public void onMessage(String message) {
+	        Log.d(TAG, String.format("Got string message! %s", message));
+	    }
 
-		final String wsuri = "ws://178.79.139.131/9000/api";
+	    @Override
+	    public void onMessage(byte[] data) {
+	        //Log.d(TAG, String.format("Got binary message! %s", toHexString(data)));
+	    }
 
-		try {
-			mConnection.connect(wsuri, new WebSocketHandler() {
+	    @Override
+	    public void onDisconnect(int code, String reason) {
+	        Log.d(TAG, String.format("Disconnected! Code: %d Reason: %s", code, reason));
+	    }
 
-				@Override
-				public void onOpen() {
-					Log.d(TAG, "Status: Connected to " + wsuri);
-					//mConnection.sendTextMessage("Hello, world!");
-				}
+	    @Override
+	    public void onError(Exception error) {
+	        Log.e(TAG, "Error!", error);
+	    }
+	}, null);
 
-				@Override
-				public void onTextMessage(String payload) {
-					Log.d(TAG, "Got echo: " + payload);
-				}
-
-				@Override
-				public void onClose(int code, String reason) {
-					Log.d(TAG, "Connection lost.");
-				}
-			});
-		} catch (WebSocketException e) {
-
-			Log.d(TAG, e.toString());
-		}
-	}
 	
 	private static final String TAG = "FanBurst";
 
