@@ -12,20 +12,20 @@
         android:id="@+id/rowTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/sectorTextView"
         android:layout_below="@+id/sectorTextView"
         android:layout_marginTop="57dp"
         android:ems="10"
+        android:layout_centerInParent="true"
         android:inputType="number" />
 
     <EditText
         android:id="@+id/placeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/rowTextView"
         android:layout_below="@+id/rowTextView"
         android:layout_marginTop="50dp"
         android:ems="10"
+        android:layout_centerInParent="true"
         android:inputType="number" />
 
     <TextView
@@ -41,10 +41,10 @@
         android:id="@+id/sectorTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_below="@+id/textView1"
         android:layout_marginLeft="38dp"
         android:ems="10"
+        android:layout_centerInParent="true"
         android:inputType="number" />
 
     <TextView
@@ -53,7 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/rowTextView"
         android:layout_below="@+id/sectorTextView"
-        android:layout_marginTop="42dp"
+        android:layout_marginTop="40dp"
         android:text="Ряд" />
 
     <TextView
@@ -62,7 +62,17 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/placeTextView"
         android:layout_below="@+id/rowTextView"
-        android:layout_marginTop="34dp"
+        android:layout_marginTop="32dp"
+        android:layout_centerInParent="true"
         android:text="Место" />
-
+    
+    <Button
+        android:id="@+id/registerButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Зарегестрироваться" 
+        android:layout_below="@+id/placeTextView"
+        android:layout_marginTop="20dp"
+        android:layout_centerInParent="true">
+    </Button>
 </RelativeLayout>
