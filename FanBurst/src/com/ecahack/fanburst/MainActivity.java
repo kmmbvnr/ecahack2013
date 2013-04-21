@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import com.ecahack.fanburst.WSClient.WSClientListener;
 
+import android.graphics.Typeface;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -84,6 +86,8 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			initCamera();
 		else 
 			showNoCameraDialog();
+		
+		setupFonts();
 	}
 	
 	@Override
@@ -255,6 +259,11 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 
 	private void sendRegisterInfo() {
 		mWSClient.sendRegisterInfo(getDeviceId(), getUserSector(), getUserRow(), getUserPlace());
+		InputMethodManager imm = (InputMethodManager)getSystemService(
+			      Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(this.findViewById(R.id.sectorTextView).getWindowToken(), 0);
+		imm.hideSoftInputFromWindow(this.findViewById(R.id.rowTextView).getWindowToken(), 0);
+		imm.hideSoftInputFromWindow(this.findViewById(R.id.placeTextView).getWindowToken(), 0);
 		flipper.showNext();	
 	}
 
@@ -356,5 +365,14 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		builder.setMessage("Camera is necessary for application.");
 		builder.setPositiveButton("OK", null);
 		builder.show();
+	}
+	
+	private void setupFonts(){
+		Typeface font = Typeface.createFromAsset(getAssets(), "calibri.ttf");  
+		((TextView) findViewById(R.id.sectorText)).setTypeface(font);
+		((TextView) findViewById(R.id.rowText)).setTypeface(font);
+		((TextView) findViewById(R.id.placeText)).setTypeface(font);
+		
+		mRegisterButton.setTypeface(font);
 	}
 }

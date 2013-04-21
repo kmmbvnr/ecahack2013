@@ -1,66 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@android:color/white"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:background="#262626" >
 
-    <ToggleButton
-        android:id="@+id/togglebutton"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="116dp"
-        android:textOff="Не участвовать"
-        android:textOn="Участвовать"
-        android:onClick="onToggleClicked" />
-    
-    <Button
-        android:id="@+id/flashOnShakeButton"
+    <RelativeLayout
+        android:id="@+id/relativeLayout1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Включи и свети :)" 
-        android:layout_below="@+id/togglebutton"
-        android:layout_marginTop="120dp"
-        android:layout_centerInParent="true">
-    </Button>
+        android:layout_centerHorizontal="true" >
 
-    <TextView
-        android:id="@+id/activeUsersTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="47dp"
-        android:text="12" />
+        <ToggleButton
+            android:id="@+id/togglebutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="116dp"
+            android:background="@drawable/round_button_background"
+            android:onClick="onToggleClicked"
+            android:textColor="#FF6F45"
+            android:textOff="Жми и участвуй"
+            android:textOn=""
+            android:textSize="20sp" />
 
-    <TextView
-        android:id="@+id/patternTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/togglebutton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dp" />
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" 
+            android:layout_below="@+id/togglebutton"
+            android:layout_alignRight="@+id/togglebutton">
+          
+            <TextView
+                android:id="@+id/activeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/togglebutton"
+                android:text="Участники:"
+                android:textColor="#FF6F45"
+                android:textSize="12sp" />
 
-    <ImageView
-        android:id="@+id/bulbImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="30dp"
-        android:layout_marginTop="30dp"
-        android:src="@drawable/ic_img_bulb" 
-        android:contentDescription="TODO"/>
+            <TextView
+                android:id="@+id/activeUsersTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/activeText"
+                android:layout_marginLeft="3dp"
+                android:text="0"
+                android:textColor="#FF6F45"
+                android:textSize="12sp" />
+        </RelativeLayout>
 
-    <TextView
-        android:id="@+id/timer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/flashOnShakeButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="25dp"
-        android:text="1"
-        android:textSize="30sp" />
+        <TextView
+            android:id="@+id/patternTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/togglebutton"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp" />
+
+        <ImageView
+            android:id="@+id/bulbImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="30dp"
+            android:layout_marginTop="30dp"
+            android:contentDescription="TODO"
+            android:src="@drawable/ic_img_bulb" />
+
+        <TextView
+            android:id="@+id/timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/togglebutton"
+            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="25dp"
+            android:text=""
+            android:textSize="30sp" />
+
+        <Button
+            android:id="@+id/flashOnShakeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="40dp"
+            android:background="@drawable/flash_button"
+            android:textColor="#FFFFFF" />
+    </RelativeLayout>
 
 </RelativeLayout>
