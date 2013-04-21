@@ -42,7 +42,7 @@ class PatternBuilder(object):
 
     def start(self):
         self.stop()
-        delay = random.randint(5, 10)
+        delay = random.randint(15, 30)
         self.active_timer = reactor.callLater(delay, self.execute)
 
     def stop(self):
@@ -60,7 +60,7 @@ class PatternBuilder(object):
         self.start()
 
     def create_pattern(self):
-        pattern_num = random.randint(2,2)
+        pattern_num = random.randint(1,3)
         if pattern_num == 1: 
             """
             Мигаем
@@ -83,12 +83,30 @@ class PatternBuilder(object):
                     template = [0, 0, 0, 1, 1, 0, 0, 0 ]
                 else:
                     template = [0, 0, 0, 0, 0, 0, 1, 1 ]
+                template = [1, 1, 0, 1, 1, 0, 1, 1]
 
                 yield fun, {
                     'pattern_name': u'Вперед, омичка, Мы с тобой',
                     'start_at': calendar.timegm(datetime.utcnow().utctimetuple()) + 10,
                     'interval': 200,
                     'pattern':  [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0] + template
+                }
+        elif pattern_num == 3:
+            """
+            Волна
+            """
+            rows = [x.row for x in self.active_fans.values()]
+            rows = sorted(rows)
+
+            for fun, data in self.active_fans.items():
+                template = [0]* len(rows)
+                template[rows.index(data.row)] = 1
+
+                yield fun, {
+                    'pattern_name': u'Волна',
+                    'start_at': calendar.timegm(datetime.utcnow().utctimetuple()) + 10,
+                    'interval': 500,
+                    'pattern':  (template + list(reversed(template))) * 3
                 }
 
 
