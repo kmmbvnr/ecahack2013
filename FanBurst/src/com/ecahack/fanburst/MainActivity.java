@@ -147,7 +147,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 				@Override
 				public void run() {
 					mCamera.startPreview();
-					turnOn();
+					//turnOn();
 					long startInterval = startAt - mTimeSync.getCurrentTimestamp();
 					//startPatternAfterDelay(startAt, startInterval, pattern, interval);
 					runTimerWithSec(startInterval,startAt, startInterval, pattern, interval);
