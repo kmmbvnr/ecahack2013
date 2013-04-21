@@ -65,7 +65,7 @@ class PatternBuilder(object):
         self.start()
 
     def create_pattern(self):
-        pattern_num = random.randint(1,3)
+        pattern_num = random.randint(1,2)
         start_at = timestamp() + 5000;
         if pattern_num == 1: 
             """
