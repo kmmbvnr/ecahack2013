@@ -134,10 +134,11 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			MainActivity.this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					turnOn();
 					long startInterval = startAt - mTimeSync.getCurrentTimestamp();
+					startPatternAfterDelay(startAt, startInterval, pattern, interval);
 					runTimerWithSec(startInterval);
 					mPatternTextView.setText(name);
-					startPatternAfterDelay(startInterval, pattern, interval);
 				}
 			});	
 		}
@@ -213,7 +214,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		}.start();
 	}
 	
-	private void startPatternAfterDelay(long delay, final ArrayList<Integer> pattern, final long interval) {
+	private void startPatternAfterDelay(final long startAt, long delay, final ArrayList<Integer> pattern, final long interval) {
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override
@@ -221,21 +222,34 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 				MainActivity.this.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						runPattern(pattern, interval, 0);
+						runPattern(startAt, pattern, interval, 0);
 					}
 				});
 			}
-		}, delay);
+		}, delay-500);
 	}
 	
-	private void runPattern(final ArrayList<Integer> list, final long interval, final int i) {
-		new CountDownTimer(list.size()*interval+50, interval) {
+	private void runPattern(final long startAt, final ArrayList<Integer> list, final long interval, final int i) {
+		new CountDownTimer(list.size()*interval+1000, interval) {
 			int step = 0;
 			
 			@Override
 			public void onTick(long millisUntilFinished) {
-				if(step>=list.size())
+				if(step>=list.size()) {
+					turnOff();
 					return;
+				}
+				
+				if(step==0) {
+					Log.d("WSClient", "spin lock");
+					turnOff();
+					for(;;) {
+						if(mTimeSync.getCurrentTimestamp()>=startAt) {
+							break;
+						}
+					}
+				}
+				
 				Integer brightness = list.get(step);
 				if (brightness == 1)
 					turnOn();

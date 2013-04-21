@@ -95,7 +95,7 @@ class PatternBuilder(object):
                     'pattern_name': u'Вперед, омичка, Мы с тобой',
                     'start_at': start_at,
                     'interval': 300,
-                    'pattern':  [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0] + template
+                    'pattern':  [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0] + template
                 }
         elif pattern_num == 3:
             """
