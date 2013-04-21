@@ -47,7 +47,7 @@ class PatternBuilder(object):
 
     def start(self):
         self.stop()
-        delay = random.randint(15, 30)
+        delay = random.randint(20, 30)
         self.active_timer = reactor.callLater(delay, self.execute)
 
     def stop(self):
