@@ -145,11 +145,13 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			MainActivity.this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					mCamera.startPreview();
+					turnOn();
 					long startInterval = startAt - mTimeSync.getCurrentTimestamp();
-					runTimerWithSec(startInterval);
+					//startPatternAfterDelay(startAt, startInterval, pattern, interval);
+					runTimerWithSec(startInterval,startAt, startInterval, pattern, interval);
 					mPatternTextView.setText(name);
 					mActiveButton.setText("");
-					startPatternAfterDelay(startInterval, pattern, interval);
 				}
 			});	
 		}
@@ -192,7 +194,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		}
 	}
 
-	private void runTimerWithSec(final long sec) {
+	private void runTimerWithSec(final long sec, final long startAt, long delay, final ArrayList<Integer> pattern, final long interval) {
 		mTimerLayout.setVisibility(View.VISIBLE);
 		final Animation in = new AlphaAnimation(0.0f, 1.0f);
 		in.setDuration(500);
@@ -221,6 +223,12 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 				mTimerView.setText("");
 				mTimerLayout.setVisibility(View.GONE);
 				mActiveButton.setText("!!!");
+				MainActivity.this.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						runPattern(startAt, pattern, interval, 0);
+					}
+				});
 			}
 
 			@Override
@@ -232,8 +240,8 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 
 		}.start();
 	}
-
-	private void startPatternAfterDelay(long delay, final ArrayList<Integer> pattern, final long interval) {
+	
+	private void startPatternAfterDelay(final long startAt, long delay, final ArrayList<Integer> pattern, final long interval) {
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override
@@ -241,21 +249,35 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 				MainActivity.this.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						runPattern(pattern, interval, 0);
+						runPattern(startAt, pattern, interval, 0);
 					}
 				});
 			}
-		}, delay);
+		}, delay-500);
 	}
-
-	private void runPattern(final ArrayList<Integer> list, final long interval, final int i) {
-		new CountDownTimer(list.size()*interval+50, interval) {
+	
+	private void runPattern(final long startAt, final ArrayList<Integer> list, final long interval, final int i) {
+		new CountDownTimer(list.size()*interval+1000, interval) {
 			int step = 0;
 
 			@Override
 			public void onTick(long millisUntilFinished) {
-				if(step>=list.size())
+				if(step>=list.size()) {
+					turnOff();
 					return;
+				}
+				
+				if(step==0) {
+					Log.d("WSClient", "spin lock");
+					turnOff();
+					for(;;) {
+
+						if(mTimeSync.getCurrentTimestamp()>=startAt) {
+							break;
+						}
+					}
+				}
+				
 				Integer brightness = list.get(step);
 				if (brightness == 1)
 					turnOn();
@@ -336,8 +358,8 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			isFlashOn = true;
 			Parameters params = mCamera.getParameters();
 			params.setFlashMode(Parameters.FLASH_MODE_TORCH);
-			mCamera.setParameters(params);      
-			mCamera.startPreview();
+			mCamera.setParameters(params);  
+			//mCamera.startPreview();
 			mBulbView.setImageResource(R.drawable.ic_img_bulb_on);
 		}
 	}

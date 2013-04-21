@@ -2,6 +2,8 @@ package com.ecahack.fanburst;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -120,6 +122,13 @@ public class WSClient {
 		@Override
 		public void onDisconnect(int code, String reason) {
 			Log.d(TAG, String.format("Disconnected! Code: %d Reason: %s", code, reason));
+			Timer timer = new Timer();
+			timer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					WSClient.this.connect();
+				}
+			}, 1000);
 		}
 
 		@Override

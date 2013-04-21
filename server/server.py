@@ -47,7 +47,7 @@ class PatternBuilder(object):
 
     def start(self):
         self.stop()
-        delay = random.randint(20, 30)
+        delay = random.randint(25, 35)
         self.active_timer = reactor.callLater(delay, self.execute)
 
     def stop(self):
@@ -90,14 +90,14 @@ class PatternBuilder(object):
                 else:
                     template = [0, 0, 0, 0, 0, 0, 1, 1 ]
                 template = [1, 1, 0, 1, 1, 0, 1, 1]
-
+        
                 yield fun, {
                     'pattern_name': u'Вперед, омичка, Мы с тобой',
                     'start_at': start_at,
                     'interval': 300,
-                    'pattern':  [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0] + template
+                    'pattern':  [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0] + template
                 }
-        elif pattern_num == 3:
+        elif pattern_num == -1:
             """
             Волна
             """
@@ -113,6 +113,17 @@ class PatternBuilder(object):
                     'start_at': start_at,
                     'interval': 500,
                     'pattern':  (template + list(reversed(template))) * 3
+                }
+        elif pattern_num == 3:
+            """
+            Тум-тем
+            """
+            for fun in self.active_fans.keys():
+                yield fun, {
+                    'pattern_name': u'Там-дам-та-да-дам!',
+                    'start_at': start_at,
+                    'interval': 200,
+                    'pattern':  [1,1,1,0,1,1,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,0,0,1,0,1,0]
                 }
 
 
@@ -154,8 +165,9 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
         fan.place = int(message['data']['place'])
         
         # send stats back
+        self._sendStats()
         self._stats_updater = task.LoopingCall(self._sendStats)
-        self._stats_updater.start(2)
+        self._stats_updater.start(5)
 
     def command_activate(self, message):
         self.fans[self].active = True
@@ -163,8 +175,6 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
 
         if len(self.active_fans) == 1:
             self.pattern_builder.start()
-        elif len(self.active_fans) > len(self.fans)*0.7:
-            self.pattern_builder.execute()
 
     def command_deactivate(self, message):
         if self in self.fans:
