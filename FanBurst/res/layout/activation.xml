@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/round_button_background"
             android:onClick="onToggleClicked"
             android:textColor="#FF6F45"
@@ -106,7 +106,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="5dp"
             android:layout_marginLeft="40dp"
             android:background="@drawable/flash_button"
             android:textColor="#FFFFFF" />
@@ -128,7 +128,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/hintForFlash"
             android:layout_alignRight="@+id/flashOnShakeButton"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="8dp"
             android:src="@drawable/bigfan" />
 
         <ImageView
@@ -136,7 +136,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/hintForFlash"
-            android:layout_marginBottom="55dp"
+            android:layout_marginBottom="22dp"
             android:layout_toLeftOf="@+id/imageView1"
             android:src="@drawable/bubble" />
 
