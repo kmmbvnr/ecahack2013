@@ -161,8 +161,10 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
             self.pattern_builder.execute()
 
     def command_deactivate(self, message):
-        self.fans[self].active = False
-        del self.active_fans[self]
+        if self in self.fans:
+            self.fans[self].active = False
+        if self in self.active_fans:
+            del self.active_fans[self]
 
     def command_timesync(self, message):
         data = {
