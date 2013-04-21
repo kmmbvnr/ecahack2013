@@ -2,6 +2,8 @@ package com.ecahack.fanburst;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.ecahack.fanburst.WSClient.WSClientListener;
 
@@ -128,13 +130,14 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	@Override
 	public void showPattern(final String name, final long startAt, final long interval, final ArrayList<Integer> pattern) {
 		if (!mPatternRunning) {
+			mPatternRunning = true;
 			MainActivity.this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					long startInterval = startAt - mTimeSync.getCurrentTimestamp();
 					runTimerWithSec(startInterval);
 					mPatternTextView.setText(name);
-					startPatternAfterDelay(startInterval*1000, pattern, interval);
+					startPatternAfterDelay(startInterval, pattern, interval);
 				}
 			});	
 		}
@@ -173,13 +176,11 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	}
 	
 	private void runTimerWithSec(final long sec) {
-		mTimerView.setText(String.valueOf(sec));
-		
 		final Animation in = new AlphaAnimation(0.0f, 1.0f);
-	    in.setDuration(400);
+	    in.setDuration(500);
 	    
 	    final Animation out = new AlphaAnimation(1.0f, 0.0f);
-	    out.setDuration(500);
+	    out.setDuration(400);
 	    
 	    in.setAnimationListener(new AnimationListener() {
 			@Override
@@ -193,37 +194,36 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 				mTimerView.startAnimation(out);
 			}
 		});
-	    out.setAnimationListener(new AnimationListener() {
+	    
+		new CountDownTimer(sec, 1000) {
+			long seconds = sec/1000;
+			
 			@Override
-			public void onAnimationEnd(Animation animation) {
-				if (sec-1 > 0)
-					runTimerWithSec(sec-1);
-				else
-					mTimerView.setText("");
+			public void onFinish() {
+				mTimerView.setText("");
 			}
+
 			@Override
-			public void onAnimationRepeat(Animation animation) {
+			public void onTick(long millisUntilFinished) {
+				mTimerView.setText(String.valueOf(seconds));
+				mTimerView.startAnimation(in);
+				seconds--;
 			}
-			@Override
-			public void onAnimationStart(Animation animation) {
-			}
-		});
-	    mTimerView.startAnimation(in);
-	 
+		
+		}.start();
 	}
 	
 	private void startPatternAfterDelay(long delay, final ArrayList<Integer> pattern, final long interval) {
-		final Handler handler = new Handler();
-		handler.postDelayed(new Runnable() {
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				MainActivity.this.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						mPatternRunning = true;
 						runPattern(pattern, interval, 0);
 					}
-				});	
+				});
 			}
 		}, delay);
 	}
