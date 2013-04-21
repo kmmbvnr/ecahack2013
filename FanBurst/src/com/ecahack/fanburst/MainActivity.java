@@ -177,10 +177,10 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	
 	private void runTimerWithSec(final long sec) {
 		final Animation in = new AlphaAnimation(0.0f, 1.0f);
-	    in.setDuration(500);
+	    in.setDuration(400);
 	    
 	    final Animation out = new AlphaAnimation(1.0f, 0.0f);
-	    out.setDuration(400);
+	    out.setDuration(300);
 	    
 	    in.setAnimationListener(new AnimationListener() {
 			@Override

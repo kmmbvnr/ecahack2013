@@ -66,6 +66,7 @@ class PatternBuilder(object):
 
     def create_pattern(self):
         pattern_num = random.randint(1,3)
+        start_at = timestamp() + 5000;
         if pattern_num == 1: 
             """
             Мигаем
@@ -73,7 +74,7 @@ class PatternBuilder(object):
             for fun in self.active_fans.keys():
                 yield fun, {
                     'pattern_name': u'А-а-а-а-а-а!',
-                    'start_at': timestamp() + 5000,
+                    'start_at': start_at,
                     'interval': 100,
                     'pattern':  [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]
                 }
@@ -92,7 +93,7 @@ class PatternBuilder(object):
 
                 yield fun, {
                     'pattern_name': u'Вперед, омичка, Мы с тобой',
-                    'start_at': timestamp() + 5000,
+                    'start_at': start_at,
                     'interval': 300,
                     'pattern':  [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0] + template
                 }
@@ -109,7 +110,7 @@ class PatternBuilder(object):
 
                 yield fun, {
                     'pattern_name': u'Волна',
-                    'start_at': timestamp() + 5000,
+                    'start_at': start_at,
                     'interval': 500,
                     'pattern':  (template + list(reversed(template))) * 3
                 }
