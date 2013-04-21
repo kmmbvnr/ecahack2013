@@ -12,7 +12,6 @@ import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -194,12 +193,11 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 
 	private void runTimerWithSec(final long sec) {
 		mTimerLayout.setVisibility(View.VISIBLE);
-		mTimerView.setText(String.valueOf(sec));
 		final Animation in = new AlphaAnimation(0.0f, 1.0f);
-		in.setDuration(300);
+		in.setDuration(500);
 
 		final Animation out = new AlphaAnimation(1.0f, 0.0f);
-		out.setDuration(300);
+		out.setDuration(500);
 
 		in.setAnimationListener(new AnimationListener() {
 			@Override
@@ -269,7 +267,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			public void onFinish() {
 				mPatternRunning = false;
 				mPatternTextView.setText("");
-				mActiveButton.setText(getString(R.string.wait_users));
+				mActiveButton.setText(getString((mActiveButton.isChecked()) ? R.string.wait_users : R.string.press_and_patricipate));
 				turnOff();
 			}
 		}.start();
