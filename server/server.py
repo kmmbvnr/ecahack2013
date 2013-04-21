@@ -120,7 +120,7 @@ class PatternBuilder(object):
             """
             for fun in self.active_fans.keys():
                 yield fun, {
-                    'pattern_name': u'А-а-а-а-а-а!',
+                    'pattern_name': u'Там-дам-та-да-дам!',
                     'start_at': start_at,
                     'interval': 200,
                     'pattern':  [1,1,1,0,1,1,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,0,0,1,0,1,0]
