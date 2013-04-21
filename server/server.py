@@ -15,6 +15,11 @@ from twisted.internet import reactor, task
 BASE_PATH = os.path.dirname(__file__)
 
 
+def timestamp():
+    dt = datetime.utcnow()
+    return calendar.timegm(dt.utctimetuple())*1000 + (dt.microsecond/1000)
+
+
 class Application(cyclone.web.Application):
     def __init__(self):
         fans = {}
@@ -68,7 +73,7 @@ class PatternBuilder(object):
             for fun in self.active_fans.keys():
                 yield fun, {
                     'pattern_name': u'А-а-а-а-а-а!',
-                    'start_at': calendar.timegm(datetime.utcnow().utctimetuple()) + 10,
+                    'start_at': timestamp() + 5000,
                     'interval': 100,
                     'pattern':  [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]
                 }
@@ -87,7 +92,7 @@ class PatternBuilder(object):
 
                 yield fun, {
                     'pattern_name': u'Вперед, омичка, Мы с тобой',
-                    'start_at': calendar.timegm(datetime.utcnow().utctimetuple()) + 10,
+                    'start_at': timestamp() + 5000,
                     'interval': 300,
                     'pattern':  [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0] + template
                 }
@@ -104,7 +109,7 @@ class PatternBuilder(object):
 
                 yield fun, {
                     'pattern_name': u'Волна',
-                    'start_at': calendar.timegm(datetime.utcnow().utctimetuple()) + 10,
+                    'start_at': timestamp() + 5000,
                     'interval': 500,
                     'pattern':  (template + list(reversed(template))) * 3
                 }
@@ -171,7 +176,7 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
             'type': 'timesync',
             'data': {
                 'sent_time' : message['data']['sent_time'],
-                'server_time' : calendar.timegm(datetime.utcnow().utctimetuple())
+                'server_time' : timestamp()
             }
         }
         self.sendMessage(cyclone.escape.json_encode(data))

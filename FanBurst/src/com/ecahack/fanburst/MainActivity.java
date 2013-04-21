@@ -19,6 +19,9 @@ import android.view.*;
 import android.view.SurfaceHolder.Callback;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,6 +37,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	private Button mFlashButton;
 	private TextView mActiveUsersView;
 	private TextView mPatternTextView;
+	private TextView mTimerView;
 	private ImageView mBulbView;
 	private ViewFlipper flipper;
 	private boolean mPatternRunning;
@@ -68,7 +72,8 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		
 		mActiveUsersView = (TextView)this.findViewById(R.id.activeUsersTextView);
 		mPatternTextView = (TextView)this.findViewById(R.id.patternTextView);
-
+		mTimerView = (TextView)this.findViewById(R.id.timer);
+		
 		mBulbView = (ImageView)this.findViewById(R.id.bulbImageView);
 		
 		mWSClient = new WSClient(this);
@@ -121,14 +126,15 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	}
 
 	@Override
-	public void showPattern(final String name, long startAt, final long interval, final ArrayList<Integer> pattern) {
+	public void showPattern(final String name, final long startAt, final long interval, final ArrayList<Integer> pattern) {
 		if (!mPatternRunning) {
 			MainActivity.this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					mPatternRunning = true;
-					runPattern(pattern, interval, 0);
+					long startInterval = startAt - mTimeSync.getCurrentTimestamp();
+					runTimerWithSec(startInterval);
 					mPatternTextView.setText(name);
+					startPatternAfterDelay(startInterval*1000, pattern, interval);
 				}
 			});	
 		}
@@ -164,6 +170,62 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		} else {
 			sendDeactivateRequest();
 		}
+	}
+	
+	private void runTimerWithSec(final long sec) {
+		mTimerView.setText(String.valueOf(sec));
+		
+		final Animation in = new AlphaAnimation(0.0f, 1.0f);
+	    in.setDuration(400);
+	    
+	    final Animation out = new AlphaAnimation(1.0f, 0.0f);
+	    out.setDuration(500);
+	    
+	    in.setAnimationListener(new AnimationListener() {
+			@Override
+			public void onAnimationStart(Animation animation) {
+			}
+			@Override
+			public void onAnimationRepeat(Animation animation) {	
+			}
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				mTimerView.startAnimation(out);
+			}
+		});
+	    out.setAnimationListener(new AnimationListener() {
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				if (sec-1 > 0)
+					runTimerWithSec(sec-1);
+				else
+					mTimerView.setText("");
+			}
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+			}
+			@Override
+			public void onAnimationStart(Animation animation) {
+			}
+		});
+	    mTimerView.startAnimation(in);
+	 
+	}
+	
+	private void startPatternAfterDelay(long delay, final ArrayList<Integer> pattern, final long interval) {
+		final Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				MainActivity.this.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						mPatternRunning = true;
+						runPattern(pattern, interval, 0);
+					}
+				});	
+			}
+		}, delay);
 	}
 	
 	private void runPattern(final ArrayList<Integer> list, final long interval, final int i) {
