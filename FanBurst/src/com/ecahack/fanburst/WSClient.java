@@ -24,7 +24,7 @@ public class WSClient {
 		mClient.connect();
 	}
 	
-	public void sendRegisterInfo(String deviceId, String sector, String row, String place) {
+	public boolean sendRegisterInfo(String deviceId, String sector, String row, String place) {
 		
 		if (validateUserRegisterData(sector, row, place)) {
 			JSONObject object = new JSONObject();
@@ -41,7 +41,9 @@ public class WSClient {
 			}
 			
 			mClient.send(object.toString());
+			return true;
 		}
+		return false;
 	}
 
 	public void sentTimesyncRequest(long currentTimestamp) {
@@ -136,7 +138,9 @@ public class WSClient {
 	}, null);
 	
 	private boolean validateUserRegisterData(String sector, String row, String place) {
-		return (Integer.parseInt(sector) > 0 && Integer.parseInt(row) > 0 && Integer.parseInt(place) > 0);
+		return (sector.length()>0 && Integer.parseInt(sector) > 0 && 
+				row.length()>0 && Integer.parseInt(row) > 0 && 
+				place.length()>0 && Integer.parseInt(place) > 0);
 	}
 
 	

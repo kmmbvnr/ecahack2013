@@ -31,7 +31,7 @@
             android:layout_alignTop="@+id/togglebutton"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="90dp" >
-            
+
             <TextView
                 android:id="@+id/beforeStartLeftMessage"
                 android:layout_width="wrap_content"
@@ -44,20 +44,20 @@
                 android:id="@+id/timer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
                 android:layout_below="@+id/beforeStartLeftMessage"
+                android:layout_centerInParent="true"
                 android:text=""
                 android:textColor="#FF6F45"
                 android:textSize="30sp" />
-            
+
             <TextView
                 android:id="@+id/timerSec"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="сек"
-                android:layout_toRightOf="@+id/timer"
                 android:layout_alignBaseline="@+id/timer"
                 android:layout_marginLeft="2dp"
+                android:layout_toRightOf="@+id/timer"
+                android:text="сек"
                 android:textColor="#FF6F45"
                 android:textSize="20sp" />
         </RelativeLayout>
@@ -89,17 +89,6 @@
                 android:textSize="12sp" />
         </RelativeLayout>
 
-        <TextView
-            android:id="@+id/patternTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/togglebutton"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="44dp"
-            android:text=""
-            android:textColor="#FF6F45"
-            android:textSize="20sp" />
-
         <ImageView
             android:id="@+id/bulbImageView"
             android:layout_width="wrap_content"
@@ -121,6 +110,58 @@
             android:layout_marginLeft="40dp"
             android:background="@drawable/flash_button"
             android:textColor="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/hintForFlash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/flashOnShakeButton"
+            android:layout_alignLeft="@+id/flashOnShakeButton"
+            android:layout_marginBottom="5dp"
+            android:text="Пока ждем остальных, поддержи команду сам!"
+            android:textColor="#919191"
+            android:textSize="12sp" />
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/hintForFlash"
+            android:layout_alignRight="@+id/flashOnShakeButton"
+            android:layout_marginBottom="12dp"
+            android:src="@drawable/bigfan" />
+
+        <ImageView
+            android:id="@+id/imageViewBubble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/togglebutton"
+            android:layout_marginTop="55dp"
+            android:layout_toLeftOf="@+id/imageView1"
+            android:src="@drawable/bubble" />
+
+        <TextView
+            android:id="@+id/patternTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/imageViewBubble"
+            android:layout_alignTop="@+id/imageViewBubble"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
+            android:maxWidth="200dp"
+            android:text=""
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/patternTextView"
+            android:layout_alignLeft="@+id/imageViewBubble"
+            android:textColor="#919191"
+            android:textSize="12sp"
+            android:text="Что будем кричать:" />
     </RelativeLayout>
 
 </RelativeLayout>

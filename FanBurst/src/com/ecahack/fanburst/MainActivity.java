@@ -29,6 +29,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -296,13 +297,15 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	}
 
 	private void sendRegisterInfo() {
-		mWSClient.sendRegisterInfo(getDeviceId(), getUserSector(), getUserRow(), getUserPlace());
-		InputMethodManager imm = (InputMethodManager)getSystemService(
-				Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(this.findViewById(R.id.sectorTextView).getWindowToken(), 0);
-		imm.hideSoftInputFromWindow(this.findViewById(R.id.rowTextView).getWindowToken(), 0);
-		imm.hideSoftInputFromWindow(this.findViewById(R.id.placeTextView).getWindowToken(), 0);
-		flipper.showNext();	
+		boolean sent = mWSClient.sendRegisterInfo(getDeviceId(), getUserSector(), getUserRow(), getUserPlace());
+		if (sent) {
+			InputMethodManager imm = (InputMethodManager)getSystemService(
+					Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(this.findViewById(R.id.sectorTextView).getWindowToken(), 0);
+			imm.hideSoftInputFromWindow(this.findViewById(R.id.rowTextView).getWindowToken(), 0);
+			imm.hideSoftInputFromWindow(this.findViewById(R.id.placeTextView).getWindowToken(), 0);
+			flipper.showNext();	
+		}
 	}
 
 	private void sentTimesyncRequest() {
@@ -407,10 +410,16 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 
 	private void setupFonts(){
 		Typeface font = Typeface.createFromAsset(getAssets(), "calibri.ttf");  
-		((TextView) findViewById(R.id.sectorText)).setTypeface(font);
-		((TextView) findViewById(R.id.rowText)).setTypeface(font);
-		((TextView) findViewById(R.id.placeText)).setTypeface(font);
-
-		mRegisterButton.setTypeface(font);
+		LinearLayout ll = (LinearLayout) findViewById(R.id.main_layout);
+		int childcount = ll.getChildCount();
+		for (int i=0; i < childcount; i++){
+			View v = ll.getChildAt(i);
+			if(v instanceof TextView) {
+				((TextView)v).setTypeface(font);
+			}
+			else if (v instanceof Button) {
+				((Button)v).setTypeface(font);
+			}
+		}
 	}
 }
