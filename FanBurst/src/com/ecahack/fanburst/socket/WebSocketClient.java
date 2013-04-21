@@ -217,6 +217,8 @@ public class WebSocketClient {
     }
 
     void sendFrame(final byte[] frame) {
+    	if (mSocket == null)
+    		return;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
