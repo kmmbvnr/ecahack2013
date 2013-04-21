@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="116dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/round_button_background"
             android:onClick="onToggleClicked"
             android:textColor="#FF6F45"
@@ -25,11 +25,49 @@
             android:textSize="20sp" />
 
         <RelativeLayout
+            android:id="@+id/timerView"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" 
-            android:layout_below="@+id/togglebutton"
-            android:layout_alignRight="@+id/togglebutton">
-          
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/togglebutton"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="90dp" >
+            
+            <TextView
+                android:id="@+id/beforeStartLeftMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="до кричалки осталось:"
+                android:textColor="#BBBBBB"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/timer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/beforeStartLeftMessage"
+                android:text="100"
+                android:textColor="#FF6F45"
+                android:textSize="30sp" />
+            
+            <TextView
+                android:id="@+id/timerSec"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="сек"
+                android:layout_toRightOf="@+id/timer"
+                android:layout_alignBaseline="@+id/timer"
+                android:layout_marginLeft="2dp"
+                android:textColor="#FF6F45"
+                android:textSize="20sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/activeUsersView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/togglebutton"
+            android:layout_below="@+id/togglebutton" >
+
             <TextView
                 android:id="@+id/activeText"
                 android:layout_width="wrap_content"
@@ -43,8 +81,8 @@
                 android:id="@+id/activeUsersTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/activeText"
                 android:layout_marginLeft="3dp"
+                android:layout_toRightOf="@+id/activeText"
                 android:text="0"
                 android:textColor="#FF6F45"
                 android:textSize="12sp" />
@@ -56,7 +94,10 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/togglebutton"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="44dp"
+            android:text=""
+            android:textColor="#FF6F45"
+            android:textSize="20sp" />
 
         <ImageView
             android:id="@+id/bulbImageView"
@@ -64,21 +105,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:layout_marginRight="30dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
             android:contentDescription="TODO"
             android:src="@drawable/ic_img_bulb" />
-
-        <TextView
-            android:id="@+id/timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/togglebutton"
-            android:layout_centerHorizontal="true"
-            android:layout_centerInParent="true"
-            android:layout_marginTop="25dp"
-            android:text=""
-            android:textSize="30sp" />
 
         <Button
             android:id="@+id/flashOnShakeButton"

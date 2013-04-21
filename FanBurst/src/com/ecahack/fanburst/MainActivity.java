@@ -28,6 +28,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import android.widget.ViewFlipper;
@@ -37,11 +38,13 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	private TimeSyncService mTimeSync = new TimeSyncService();
 	private Button mRegisterButton;
 	private Button mFlashButton;
+	private ToggleButton mActiveButton;
 	private TextView mActiveUsersView;
 	private TextView mPatternTextView;
 	private TextView mTimerView;
 	private ImageView mBulbView;
 	private ViewFlipper flipper;
+	private RelativeLayout mTimerLayout;
 	private boolean mPatternRunning;
 	private boolean isFlashOn;
 
@@ -72,9 +75,13 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		mFlashButton = (Button)this.findViewById(R.id.flashOnShakeButton);
 		mFlashButton.setOnTouchListener(this);
 		
+		mActiveButton = (ToggleButton)this.findViewById(R.id.togglebutton);
+		
 		mActiveUsersView = (TextView)this.findViewById(R.id.activeUsersTextView);
 		mPatternTextView = (TextView)this.findViewById(R.id.patternTextView);
 		mTimerView = (TextView)this.findViewById(R.id.timer);
+		mTimerLayout = (RelativeLayout)this.findViewById(R.id.timerView);
+		mTimerLayout.setVisibility(View.GONE);
 		
 		mBulbView = (ImageView)this.findViewById(R.id.bulbImageView);
 		
@@ -138,6 +145,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 					long startInterval = startAt - mTimeSync.getCurrentTimestamp();
 					runTimerWithSec(startInterval);
 					mPatternTextView.setText(name);
+					mActiveButton.setText("");
 					startPatternAfterDelay(startInterval*1000, pattern, interval);
 				}
 			});	
@@ -158,9 +166,11 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			return true;
 		switch ( theMotion.getAction() ) {
 		case MotionEvent.ACTION_DOWN: 
+			mFlashButton.setSelected(true);
 			turnOn();
 			break;
 		case MotionEvent.ACTION_UP: 
+			mFlashButton.setSelected(false);
 			turnOff();
 			break;
 		}
@@ -168,15 +178,19 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	}
 	
 	public void onToggleClicked(View view) {
-		boolean on = ((ToggleButton) view).isChecked();
+		ToggleButton btn = (ToggleButton)view;
+		boolean on = btn.isChecked();
 		if (on) {
+			mActiveButton.setText(getString(R.string.wait_users));
 			sendActivateRequest();
 		} else {
 			sendDeactivateRequest();
+			mTimerLayout.setVisibility(View.GONE);
 		}
 	}
 	
 	private void runTimerWithSec(final long sec) {
+		mTimerLayout.setVisibility(View.VISIBLE);
 		mTimerView.setText(String.valueOf(sec));
 		
 		final Animation in = new AlphaAnimation(0.0f, 1.0f);
@@ -202,8 +216,10 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			public void onAnimationEnd(Animation animation) {
 				if (sec-1 > 0)
 					runTimerWithSec(sec-1);
-				else
+				else {
 					mTimerView.setText("");
+					mTimerLayout.setVisibility(View.GONE);
+				}
 			}
 			@Override
 			public void onAnimationRepeat(Animation animation) {

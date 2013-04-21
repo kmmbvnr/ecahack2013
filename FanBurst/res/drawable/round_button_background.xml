@@ -6,5 +6,7 @@
           android:state_selected="true" />
     <item android:drawable="@drawable/round_button_pressed"
           android:state_focused="true" />
+    <item android:drawable="@drawable/round_button_pressed"
+          android:state_checked="true" />
     <item android:drawable="@drawable/round_button" /> 
 </selector>
