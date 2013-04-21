@@ -121,7 +121,10 @@
             android:text="Пока ждем остальных, поддержи команду сам!"
             android:textColor="#919191"
             android:textSize="12sp" />
-
+	<RelativeLayout >
+	    
+	    
+	</RelativeLayout>
         <ImageView
             android:id="@+id/imageView1"
             android:layout_width="wrap_content"
@@ -135,8 +138,8 @@
             android:id="@+id/imageViewBubble"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/togglebutton"
-            android:layout_marginTop="55dp"
+            android:layout_above="@+id/hintForFlash"
+            android:layout_marginBottom="55dp"
             android:layout_toLeftOf="@+id/imageView1"
             android:src="@drawable/bubble" />
 
