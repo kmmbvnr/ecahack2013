@@ -144,10 +144,11 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			MainActivity.this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					mCamera.startPreview();
 					turnOn();
 					long startInterval = startAt - mTimeSync.getCurrentTimestamp();
-					startPatternAfterDelay(startAt, startInterval, pattern, interval);
-					runTimerWithSec(startInterval);
+					//startPatternAfterDelay(startAt, startInterval, pattern, interval);
+					runTimerWithSec(startInterval,startAt, startInterval, pattern, interval);
 					mPatternTextView.setText(name);
 					mActiveButton.setText("");
 				}
@@ -192,7 +193,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		}
 	}
 
-	private void runTimerWithSec(final long sec) {
+	private void runTimerWithSec(final long sec, final long startAt, long delay, final ArrayList<Integer> pattern, final long interval) {
 		mTimerLayout.setVisibility(View.VISIBLE);
 		final Animation in = new AlphaAnimation(0.0f, 1.0f);
 		in.setDuration(500);
@@ -221,6 +222,12 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 				mTimerView.setText("");
 				mTimerLayout.setVisibility(View.GONE);
 				mActiveButton.setText("!!!");
+				MainActivity.this.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						runPattern(startAt, pattern, interval, 0);
+					}
+				});
 			}
 
 			@Override
@@ -263,6 +270,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 					Log.d("WSClient", "spin lock");
 					turnOff();
 					for(;;) {
+
 						if(mTimeSync.getCurrentTimestamp()>=startAt) {
 							break;
 						}
@@ -347,8 +355,8 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			isFlashOn = true;
 			Parameters params = mCamera.getParameters();
 			params.setFlashMode(Parameters.FLASH_MODE_TORCH);
-			mCamera.setParameters(params);      
-			mCamera.startPreview();
+			mCamera.setParameters(params);  
+			//mCamera.startPreview();
 			mBulbView.setImageResource(R.drawable.ic_img_bulb_on);
 		}
 	}

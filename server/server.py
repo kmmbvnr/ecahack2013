@@ -47,7 +47,7 @@ class PatternBuilder(object):
 
     def start(self):
         self.stop()
-        delay = random.randint(15, 25)
+        delay = random.randint(25, 35)
         self.active_timer = reactor.callLater(delay, self.execute)
 
     def stop(self):
@@ -65,7 +65,7 @@ class PatternBuilder(object):
         self.start()
 
     def create_pattern(self):
-        pattern_num = random.randint(3,3)
+        pattern_num = random.randint(1,3)
         start_at = timestamp() + 5000;
         if pattern_num == 1: 
             """
@@ -90,7 +90,7 @@ class PatternBuilder(object):
                 else:
                     template = [0, 0, 0, 0, 0, 0, 1, 1 ]
                 template = [1, 1, 0, 1, 1, 0, 1, 1]
-
+        
                 yield fun, {
                     'pattern_name': u'Вперед, омичка, Мы с тобой',
                     'start_at': start_at,
@@ -165,8 +165,9 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
         fan.place = int(message['data']['place'])
         
         # send stats back
+        self._sendStats()
         self._stats_updater = task.LoopingCall(self._sendStats)
-        self._stats_updater.start(2)
+        self._stats_updater.start(5)
 
     def command_activate(self, message):
         self.fans[self].active = True
