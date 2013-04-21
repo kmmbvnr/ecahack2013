@@ -95,7 +95,7 @@ class PatternBuilder(object):
             """
             Волна
             """
-            rows = [x.row for x in self.active_fans.values()]
+            rows = set([x.row for x in self.active_fans.values()])
             rows = sorted(rows)
 
             for fun, data in self.active_fans.items():
