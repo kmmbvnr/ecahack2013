@@ -32,7 +32,7 @@
                       } else if(data['type']=='timesync') {
                           $('#id_sent_time').text(data['data']['sent_time']);
                           $('#id_server_time').text(data['data']['server_time']);
-                          $('#id_current_time').text(Math.floor((new Date()).getTime() / 1000));
+                          $('#id_current_time').text(Math.floor((new Date()).getTime()));
                       } else if(data['type']=='pattern') {
                           window.console.log('start');
                           if(!current_pattern || current_pattern['pattern'].length==0) {
@@ -94,7 +94,7 @@
               message = {
                   'command': 'timesync',
                   'data': {
-                      'sent_time': Math.floor((new Date()).getTime() / 1000)
+                      'sent_time': Math.floor((new Date()).getTime())
                   }
               };
               api.socket.send(JSON.stringify(message));

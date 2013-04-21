@@ -51,7 +51,7 @@ public class TimeSyncService {
 	}
 		
 	public long getCurrentTimestamp() {
-		return System.currentTimeMillis()/1000L + mTimeshift;
+		return System.currentTimeMillis() + mTimeshift;
 	}	
 	
 	public int getSamplesLength() {
