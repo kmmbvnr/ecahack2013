@@ -176,7 +176,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		mTimerView.setText(String.valueOf(sec));
 		
 		final Animation in = new AlphaAnimation(0.0f, 1.0f);
-	    in.setDuration(500);
+	    in.setDuration(400);
 	    
 	    final Animation out = new AlphaAnimation(1.0f, 0.0f);
 	    out.setDuration(500);
