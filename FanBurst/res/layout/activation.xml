@@ -121,10 +121,7 @@
             android:text="Пока ждем остальных, поддержи команду сам!"
             android:textColor="#919191"
             android:textSize="12sp" />
-	<RelativeLayout >
-	    
-	    
-	</RelativeLayout>
+
         <ImageView
             android:id="@+id/imageView1"
             android:layout_width="wrap_content"
@@ -162,9 +159,9 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/patternTextView"
             android:layout_alignLeft="@+id/imageViewBubble"
+            android:text="Что будем кричать:"
             android:textColor="#919191"
-            android:textSize="12sp"
-            android:text="Что будем кричать:" />
+            android:textSize="12sp" />
     </RelativeLayout>
 
 </RelativeLayout>
