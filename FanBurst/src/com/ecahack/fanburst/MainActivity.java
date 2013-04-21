@@ -196,7 +196,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		mTimerLayout.setVisibility(View.VISIBLE);
 		mTimerView.setText(String.valueOf(sec));
 		final Animation in = new AlphaAnimation(0.0f, 1.0f);
-		in.setDuration(400);
+		in.setDuration(300);
 
 		final Animation out = new AlphaAnimation(1.0f, 0.0f);
 		out.setDuration(300);
@@ -220,6 +220,8 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			@Override
 			public void onFinish() {
 				mTimerView.setText("");
+				mTimerLayout.setVisibility(View.GONE);
+				mActiveButton.setText("!!!");
 			}
 
 			@Override
@@ -267,6 +269,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			public void onFinish() {
 				mPatternRunning = false;
 				mPatternTextView.setText("");
+				mActiveButton.setText(getString(R.string.wait_users));
 				turnOff();
 			}
 		}.start();
