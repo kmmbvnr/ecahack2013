@@ -8,6 +8,7 @@ import com.ecahack.fanburst.WSClient.WSClientListener;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -166,31 +167,28 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	}
 	
 	private void runPattern(final ArrayList<Integer> list, final long interval, final int i) {
-		Integer brightness = list.get(i);
-		if (brightness == 1)
-			turnOn();
-		else
-			turnOff();
-		if (i + 1 < list.size()) {
-			final Handler handler = new Handler();
-			handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					MainActivity.this.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							runPattern(list, interval, i+1);
-						}
-					});	
-				}
-			}, interval);
-		}
-		else {
-			mPatternRunning = false;
-			mPatternTextView.setText("");
-			turnOff();
-		}
-
+		new CountDownTimer(list.size()*interval+50, interval) {
+			int step = 0;
+			
+			@Override
+			public void onTick(long millisUntilFinished) {
+				if(step>=list.size())
+					return;
+				Integer brightness = list.get(step);
+				if (brightness == 1)
+					turnOn();
+				else
+					turnOff();
+				step++;
+			}
+			
+			@Override
+			public void onFinish() {
+				mPatternRunning = false;
+				mPatternTextView.setText("");
+				turnOff();
+			}
+		}.start();
 	}
 
 	private void sendRegisterInfo() {
