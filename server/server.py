@@ -88,7 +88,7 @@ class PatternBuilder(object):
                 yield fun, {
                     'pattern_name': u'Вперед, омичка, Мы с тобой',
                     'start_at': calendar.timegm(datetime.utcnow().utctimetuple()) + 10,
-                    'interval': 200,
+                    'interval': 300,
                     'pattern':  [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0] + template
                 }
         elif pattern_num == 3:
