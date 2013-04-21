@@ -21,6 +21,7 @@ import android.view.View.OnTouchListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import android.widget.ViewFlipper;
@@ -32,6 +33,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	private Button mFlashButton;
 	private TextView mActiveUsersView;
 	private TextView mPatternTextView;
+	private ImageView mBulbView;
 	private ViewFlipper flipper;
 	private boolean mPatternRunning;
 	private boolean isFlashOn;
@@ -66,6 +68,8 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		mActiveUsersView = (TextView)this.findViewById(R.id.activeUsersTextView);
 		mPatternTextView = (TextView)this.findViewById(R.id.patternTextView);
 
+		mBulbView = (ImageView)this.findViewById(R.id.bulbImageView);
+		
 		mWSClient = new WSClient(this);
 		mWSClient.connect();
 
@@ -183,6 +187,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		}
 		else {
 			mPatternRunning = false;
+			mPatternTextView.setText("");
 			turnOff();
 		}
 
@@ -245,6 +250,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			params.setFlashMode(Parameters.FLASH_MODE_TORCH);
 			mCamera.setParameters(params);      
 			mCamera.startPreview();
+			mBulbView.setImageResource(R.drawable.ic_img_bulb_on);
 		}
 	}
 
@@ -254,6 +260,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			Parameters params = mCamera.getParameters();
 			params.setFlashMode(Parameters.FLASH_MODE_OFF);
 			mCamera.setParameters(params);
+			mBulbView.setImageResource(R.drawable.ic_img_bulb);
 		}
 	}
 
