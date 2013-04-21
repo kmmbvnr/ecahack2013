@@ -106,6 +106,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 
 	@Override
 	protected void onPause() {
+		mCamera.stopPreview();
 		super.onPause();
 	}   
 
@@ -359,7 +360,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			Parameters params = mCamera.getParameters();
 			params.setFlashMode(Parameters.FLASH_MODE_TORCH);
 			mCamera.setParameters(params);  
-			//mCamera.startPreview();
+			mCamera.startPreview();
 			mBulbView.setImageResource(R.drawable.ic_img_bulb_on);
 		}
 	}
