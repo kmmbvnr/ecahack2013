@@ -88,7 +88,7 @@ class PatternBuilder(object):
                 yield fun, {
                     'pattern_name': u'Вперед, омичка, Мы с тобой',
                     'start_at': calendar.timegm(datetime.utcnow().utctimetuple()) + 10,
-                    'interval': 200,
+                    'interval': 300,
                     'pattern':  [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0] + template
                 }
         elif pattern_num == 3:
@@ -161,8 +161,10 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
             self.pattern_builder.execute()
 
     def command_deactivate(self, message):
-        self.fans[self].active = False
-        del self.active_fans[self]
+        if self in self.fans:
+            self.fans[self].active = False
+        if self in self.active_fans:
+            del self.active_fans[self]
 
     def command_timesync(self, message):
         data = {
