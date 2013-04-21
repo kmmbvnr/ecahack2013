@@ -47,7 +47,7 @@ class PatternBuilder(object):
 
     def start(self):
         self.stop()
-        delay = random.randint(20, 30)
+        delay = random.randint(15, 25)
         self.active_timer = reactor.callLater(delay, self.execute)
 
     def stop(self):
@@ -122,8 +122,8 @@ class PatternBuilder(object):
                 yield fun, {
                     'pattern_name': u'А-а-а-а-а-а!',
                     'start_at': start_at,
-                    'interval': 100,
-                    'pattern':  [1,1,0,1,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,0,1,0,1,0]
+                    'interval': 200,
+                    'pattern':  [1,1,1,0,1,1,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,0,0,1,0,1,0]
                 }
 
 
