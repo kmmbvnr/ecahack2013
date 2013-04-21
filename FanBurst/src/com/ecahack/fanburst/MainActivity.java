@@ -7,6 +7,7 @@ import java.util.TimerTask;
 
 import com.ecahack.fanburst.WSClient.WSClientListener;
 
+import android.graphics.Typeface;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.Bundle;
@@ -25,9 +26,11 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import android.widget.ViewFlipper;
@@ -37,11 +40,13 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	private TimeSyncService mTimeSync = new TimeSyncService();
 	private Button mRegisterButton;
 	private Button mFlashButton;
+	private ToggleButton mActiveButton;
 	private TextView mActiveUsersView;
 	private TextView mPatternTextView;
 	private TextView mTimerView;
 	private ImageView mBulbView;
 	private ViewFlipper flipper;
+	private RelativeLayout mTimerLayout;
 	private boolean mPatternRunning;
 	private boolean isFlashOn;
 
@@ -71,13 +76,17 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 
 		mFlashButton = (Button)this.findViewById(R.id.flashOnShakeButton);
 		mFlashButton.setOnTouchListener(this);
-		
+
+		mActiveButton = (ToggleButton)this.findViewById(R.id.togglebutton);
+
 		mActiveUsersView = (TextView)this.findViewById(R.id.activeUsersTextView);
 		mPatternTextView = (TextView)this.findViewById(R.id.patternTextView);
 		mTimerView = (TextView)this.findViewById(R.id.timer);
-		
+		mTimerLayout = (RelativeLayout)this.findViewById(R.id.timerView);
+		mTimerLayout.setVisibility(View.GONE);
+
 		mBulbView = (ImageView)this.findViewById(R.id.bulbImageView);
-		
+
 		mWSClient = new WSClient(this);
 		mWSClient.connect();
 
@@ -86,8 +95,10 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			initCamera();
 		else 
 			showNoCameraDialog();
+
+		setupFonts();
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -139,6 +150,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 					startPatternAfterDelay(startAt, startInterval, pattern, interval);
 					runTimerWithSec(startInterval);
 					mPatternTextView.setText(name);
+					mActiveButton.setText("");
 				}
 			});	
 		}
@@ -158,32 +170,39 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			return true;
 		switch ( theMotion.getAction() ) {
 		case MotionEvent.ACTION_DOWN: 
+			mFlashButton.setSelected(true);
 			turnOn();
 			break;
 		case MotionEvent.ACTION_UP: 
+			mFlashButton.setSelected(false);
 			turnOff();
 			break;
 		}
 		return true;
 	}
-	
+
 	public void onToggleClicked(View view) {
-		boolean on = ((ToggleButton) view).isChecked();
+		ToggleButton btn = (ToggleButton)view;
+		boolean on = btn.isChecked();
 		if (on) {
+			mActiveButton.setText(getString(R.string.wait_users));
 			sendActivateRequest();
 		} else {
 			sendDeactivateRequest();
+			mTimerLayout.setVisibility(View.GONE);
 		}
 	}
-	
+
 	private void runTimerWithSec(final long sec) {
+		mTimerLayout.setVisibility(View.VISIBLE);
+		mTimerView.setText(String.valueOf(sec));
 		final Animation in = new AlphaAnimation(0.0f, 1.0f);
-	    in.setDuration(400);
-	    
-	    final Animation out = new AlphaAnimation(1.0f, 0.0f);
-	    out.setDuration(300);
-	    
-	    in.setAnimationListener(new AnimationListener() {
+		in.setDuration(300);
+
+		final Animation out = new AlphaAnimation(1.0f, 0.0f);
+		out.setDuration(300);
+
+		in.setAnimationListener(new AnimationListener() {
 			@Override
 			public void onAnimationStart(Animation animation) {
 			}
@@ -195,13 +214,15 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 				mTimerView.startAnimation(out);
 			}
 		});
-	    
+
 		new CountDownTimer(sec, 1000) {
 			long seconds = sec/1000;
-			
+
 			@Override
 			public void onFinish() {
 				mTimerView.setText("");
+				mTimerLayout.setVisibility(View.GONE);
+				mActiveButton.setText("!!!");
 			}
 
 			@Override
@@ -210,7 +231,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 				mTimerView.startAnimation(in);
 				seconds--;
 			}
-		
+
 		}.start();
 	}
 	
@@ -232,7 +253,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	private void runPattern(final long startAt, final ArrayList<Integer> list, final long interval, final int i) {
 		new CountDownTimer(list.size()*interval+1000, interval) {
 			int step = 0;
-			
+
 			@Override
 			public void onTick(long millisUntilFinished) {
 				if(step>=list.size()) {
@@ -257,11 +278,12 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 					turnOff();
 				step++;
 			}
-			
+
 			@Override
 			public void onFinish() {
 				mPatternRunning = false;
 				mPatternTextView.setText("");
+				mActiveButton.setText(getString(R.string.wait_users));
 				turnOff();
 			}
 		}.start();
@@ -269,6 +291,11 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 
 	private void sendRegisterInfo() {
 		mWSClient.sendRegisterInfo(getDeviceId(), getUserSector(), getUserRow(), getUserPlace());
+		InputMethodManager imm = (InputMethodManager)getSystemService(
+				Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(this.findViewById(R.id.sectorTextView).getWindowToken(), 0);
+		imm.hideSoftInputFromWindow(this.findViewById(R.id.rowTextView).getWindowToken(), 0);
+		imm.hideSoftInputFromWindow(this.findViewById(R.id.placeTextView).getWindowToken(), 0);
 		flipper.showNext();	
 	}
 
@@ -370,5 +397,14 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		builder.setMessage("Camera is necessary for application.");
 		builder.setPositiveButton("OK", null);
 		builder.show();
+	}
+
+	private void setupFonts(){
+		Typeface font = Typeface.createFromAsset(getAssets(), "calibri.ttf");  
+		((TextView) findViewById(R.id.sectorText)).setTypeface(font);
+		((TextView) findViewById(R.id.rowText)).setTypeface(font);
+		((TextView) findViewById(R.id.placeText)).setTypeface(font);
+
+		mRegisterButton.setTypeface(font);
 	}
 }

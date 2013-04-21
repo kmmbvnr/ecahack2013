@@ -2,78 +2,92 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#262626"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
-    
-     <EditText
-        android:id="@+id/sectorTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/activeUsersView"
-        android:layout_marginLeft="38dp"
-        android:ems="10"
-        android:layout_centerInParent="true"
-        android:inputType="number" />
 
-    <EditText
-        android:id="@+id/rowTextView"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/sectorTextView"
-        android:layout_marginTop="57dp"
-        android:ems="10"
-        android:layout_centerInParent="true"
-        android:inputType="number" />
+        android:layout_centerHorizontal="true" >
 
-    <EditText
-        android:id="@+id/placeTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/rowTextView"
-        android:layout_marginTop="50dp"
-        android:ems="10"
-        android:layout_centerInParent="true"
-        android:inputType="number" />
+        <EditText
+            android:id="@+id/sectorTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/sectorText"
+            android:layout_alignBottom="@+id/sectorText"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="90dp"
+            android:ems="10"
+            android:inputType="number" >
+        </EditText>
 
-    <TextView
-        android:id="@+id/activeUsersView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/sectorTextView"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="40dp"
-        android:text="Сектор" />
+        <EditText
+            android:id="@+id/rowTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/rowText"
+            android:layout_alignBottom="@+id/rowText"
+            android:layout_alignLeft="@+id/sectorTextView"
+            android:ems="10"
+            android:inputType="number" />
 
+        <TextView
+            android:id="@+id/rowText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/sectorText"
+            android:layout_below="@+id/sectorTextView"
+            android:layout_marginTop="40dp"
+            android:text="РЯД"
+            android:textColor="#FFFFFF" />
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/rowTextView"
-        android:layout_below="@+id/sectorTextView"
-        android:layout_marginTop="40dp"
-        android:text="Ряд" />
+        <EditText
+            android:id="@+id/placeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/rowTextView"
+            android:layout_below="@+id/rowTextView"
+            android:layout_marginTop="28dp"
+            android:ems="10"
+            android:inputType="number" />
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/placeTextView"
-        android:layout_below="@+id/rowTextView"
-        android:layout_marginTop="32dp"
-        android:layout_centerInParent="true"
-        android:text="Место" />
-    
-    <Button
-        android:id="@+id/registerButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Зарегестрироваться" 
-        android:layout_below="@+id/placeTextView"
-        android:layout_marginTop="20dp"
-        android:layout_centerInParent="true">
-    </Button>
+        <TextView
+            android:id="@+id/placeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/placeTextView"
+            android:layout_alignBottom="@+id/placeTextView"
+            android:layout_alignLeft="@+id/rowText"
+            android:text="МЕСТО"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/registerButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_alignLeft="@+id/placeText"
+            android:layout_alignRight="@+id/placeTextView"
+            android:layout_below="@+id/placeTextView"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/rounded_green_button"
+            android:text="Принять участие"
+            android:textColor="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/sectorText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="50dp"
+            android:text="СЕКТОР"
+            android:textColor="#FFFFFF" />
+    </RelativeLayout>
+
 </RelativeLayout>

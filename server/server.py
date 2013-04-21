@@ -65,7 +65,7 @@ class PatternBuilder(object):
         self.start()
 
     def create_pattern(self):
-        pattern_num = random.randint(1,3)
+        pattern_num = random.randint(3,3)
         start_at = timestamp() + 5000;
         if pattern_num == 1: 
             """
@@ -97,7 +97,7 @@ class PatternBuilder(object):
                     'interval': 300,
                     'pattern':  [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0] + template
                 }
-        elif pattern_num == 3:
+        elif pattern_num == -1:
             """
             Волна
             """
@@ -113,6 +113,17 @@ class PatternBuilder(object):
                     'start_at': start_at,
                     'interval': 500,
                     'pattern':  (template + list(reversed(template))) * 3
+                }
+        elif pattern_num == 3:
+            """
+            Тум-тем
+            """
+            for fun in self.active_fans.keys():
+                yield fun, {
+                    'pattern_name': u'А-а-а-а-а-а!',
+                    'start_at': start_at,
+                    'interval': 100,
+                    'pattern':  [1,1,0,1,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,0,1,0,1,0]
                 }
 
 
@@ -163,8 +174,6 @@ class APIHandler(cyclone.websocket.WebSocketHandler):
 
         if len(self.active_fans) == 1:
             self.pattern_builder.start()
-        elif len(self.active_fans) > len(self.fans)*0.7:
-            self.pattern_builder.execute()
 
     def command_deactivate(self, message):
         if self in self.fans:
