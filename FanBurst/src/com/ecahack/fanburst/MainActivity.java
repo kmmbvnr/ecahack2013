@@ -2,6 +2,8 @@ package com.ecahack.fanburst;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.ecahack.fanburst.WSClient.WSClientListener;
 
@@ -74,17 +76,17 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 
 		mFlashButton = (Button)this.findViewById(R.id.flashOnShakeButton);
 		mFlashButton.setOnTouchListener(this);
-		
+
 		mActiveButton = (ToggleButton)this.findViewById(R.id.togglebutton);
-		
+
 		mActiveUsersView = (TextView)this.findViewById(R.id.activeUsersTextView);
 		mPatternTextView = (TextView)this.findViewById(R.id.patternTextView);
 		mTimerView = (TextView)this.findViewById(R.id.timer);
 		mTimerLayout = (RelativeLayout)this.findViewById(R.id.timerView);
 		mTimerLayout.setVisibility(View.GONE);
-		
+
 		mBulbView = (ImageView)this.findViewById(R.id.bulbImageView);
-		
+
 		mWSClient = new WSClient(this);
 		mWSClient.connect();
 
@@ -93,10 +95,10 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			initCamera();
 		else 
 			showNoCameraDialog();
-		
+
 		setupFonts();
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -139,6 +141,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	@Override
 	public void showPattern(final String name, final long startAt, final long interval, final ArrayList<Integer> pattern) {
 		if (!mPatternRunning) {
+			mPatternRunning = true;
 			MainActivity.this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -146,7 +149,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 					runTimerWithSec(startInterval);
 					mPatternTextView.setText(name);
 					mActiveButton.setText("");
-					startPatternAfterDelay(startInterval*1000, pattern, interval);
+					startPatternAfterDelay(startInterval, pattern, interval);
 				}
 			});	
 		}
@@ -176,7 +179,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		}
 		return true;
 	}
-	
+
 	public void onToggleClicked(View view) {
 		ToggleButton btn = (ToggleButton)view;
 		boolean on = btn.isChecked();
@@ -188,18 +191,17 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 			mTimerLayout.setVisibility(View.GONE);
 		}
 	}
-	
+
 	private void runTimerWithSec(final long sec) {
 		mTimerLayout.setVisibility(View.VISIBLE);
 		mTimerView.setText(String.valueOf(sec));
-		
 		final Animation in = new AlphaAnimation(0.0f, 1.0f);
-	    in.setDuration(400);
-	    
-	    final Animation out = new AlphaAnimation(1.0f, 0.0f);
-	    out.setDuration(500);
-	    
-	    in.setAnimationListener(new AnimationListener() {
+		in.setDuration(400);
+
+		final Animation out = new AlphaAnimation(1.0f, 0.0f);
+		out.setDuration(300);
+
+		in.setAnimationListener(new AnimationListener() {
 			@Override
 			public void onAnimationStart(Animation animation) {
 			}
@@ -211,47 +213,44 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 				mTimerView.startAnimation(out);
 			}
 		});
-	    out.setAnimationListener(new AnimationListener() {
+
+		new CountDownTimer(sec, 1000) {
+			long seconds = sec/1000;
+
 			@Override
-			public void onAnimationEnd(Animation animation) {
-				if (sec-1 > 0)
-					runTimerWithSec(sec-1);
-				else {
-					mTimerView.setText("");
-					mTimerLayout.setVisibility(View.GONE);
-				}
+			public void onFinish() {
+				mTimerView.setText("");
 			}
+
 			@Override
-			public void onAnimationRepeat(Animation animation) {
+			public void onTick(long millisUntilFinished) {
+				mTimerView.setText(String.valueOf(seconds));
+				mTimerView.startAnimation(in);
+				seconds--;
 			}
-			@Override
-			public void onAnimationStart(Animation animation) {
-			}
-		});
-	    mTimerView.startAnimation(in);
-	 
+
+		}.start();
 	}
-	
+
 	private void startPatternAfterDelay(long delay, final ArrayList<Integer> pattern, final long interval) {
-		final Handler handler = new Handler();
-		handler.postDelayed(new Runnable() {
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				MainActivity.this.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						mPatternRunning = true;
 						runPattern(pattern, interval, 0);
 					}
-				});	
+				});
 			}
 		}, delay);
 	}
-	
+
 	private void runPattern(final ArrayList<Integer> list, final long interval, final int i) {
 		new CountDownTimer(list.size()*interval+50, interval) {
 			int step = 0;
-			
+
 			@Override
 			public void onTick(long millisUntilFinished) {
 				if(step>=list.size())
@@ -263,7 +262,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 					turnOff();
 				step++;
 			}
-			
+
 			@Override
 			public void onFinish() {
 				mPatternRunning = false;
@@ -276,7 +275,7 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 	private void sendRegisterInfo() {
 		mWSClient.sendRegisterInfo(getDeviceId(), getUserSector(), getUserRow(), getUserPlace());
 		InputMethodManager imm = (InputMethodManager)getSystemService(
-			      Context.INPUT_METHOD_SERVICE);
+				Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.findViewById(R.id.sectorTextView).getWindowToken(), 0);
 		imm.hideSoftInputFromWindow(this.findViewById(R.id.rowTextView).getWindowToken(), 0);
 		imm.hideSoftInputFromWindow(this.findViewById(R.id.placeTextView).getWindowToken(), 0);
@@ -382,13 +381,13 @@ public class MainActivity extends Activity implements OnClickListener, Callback,
 		builder.setPositiveButton("OK", null);
 		builder.show();
 	}
-	
+
 	private void setupFonts(){
 		Typeface font = Typeface.createFromAsset(getAssets(), "calibri.ttf");  
 		((TextView) findViewById(R.id.sectorText)).setTypeface(font);
 		((TextView) findViewById(R.id.rowText)).setTypeface(font);
 		((TextView) findViewById(R.id.placeText)).setTypeface(font);
-		
+
 		mRegisterButton.setTypeface(font);
 	}
 }

@@ -15,9 +15,9 @@
 
               start: function() {
                   if ("WebSocket" in window) {
-                      api.socket = new WebSocket("ws://localhost:9000/api");
+                      api.socket = new WebSocket("ws://178.79.139.131:9000/api");
                   } else {
-                      api.socket = new MozWebSocket("ws://localhost:9000/api");
+                      api.socket = new MozWebSocket("ws://178.79.139.131:9000/api");
                   }
 
                   api.socket.onerror = function (error) {
